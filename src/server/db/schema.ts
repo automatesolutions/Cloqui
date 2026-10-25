@@ -192,3 +192,45 @@ export const mediaJobs = pgTable("media_jobs", {
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
 })
+
+// ── Phase 3: live rooms ─────────────────────────────────────────────────────
+export const liveRoomStatus = pgEnum("live_room_status", ["open", "ended"])
+export const liveRole = pgEnum("live_role", ["cohost", "participant"])
+export type LiveRole = "host" | (typeof liveRole.enumValues)[number]
+export type AdmissionStatus = "waiting" | "admitted" | "denied" | "removed"
+
+export const liveRooms = pgTable("live_rooms", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  hostId: uuid("host_id").notNull(),
+  title: text("title").notNull(),
+  status: liveRoomStatus("status").notNull().default("open"),
+  waitingRoom: boolean("waiting_room").notNull().default(true),
+  locked: boolean("locked").notNull().default(false),
+  workspaceVisible: boolean("workspace_visible").notNull().default(false),
+  lastActiveAt: ts("last_active_at"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  endedAt: ts("ended_at"),
+})
+
+export const liveRoomInvites = pgTable("live_room_invites", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  roomId: uuid("room_id").notNull(),
+  userId: uuid("user_id"),
+  email: citext("email"),
+  role: liveRole("role").notNull().default("participant"),
+  invitedBy: uuid("invited_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+})
+
+export const liveRoomAdmissions = pgTable(
+  "live_room_admissions",
+  {
+    roomId: uuid("room_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    status: text("status").$type<AdmissionStatus>().notNull(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+    decidedBy: uuid("decided_by"),
+  },
+  (t) => [primaryKey({ columns: [t.roomId, t.userId] })]
+)

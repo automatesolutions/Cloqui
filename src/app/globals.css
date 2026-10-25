@@ -211,6 +211,53 @@
   animation: cloqui-pulse 2s ease-in-out infinite;
 }
 
+/* LiveKit components, restyled to Cloqui tokens (they read these --lk-* variables). */
+/* [data-lk-theme] raises specificity above LiveKit's own theme, which loads after this file. */
+.cloqui-lk[data-lk-theme] {
+  --lk-bg: var(--bg);
+  --lk-bg2: var(--surface);
+  --lk-bg3: var(--raised);
+  --lk-bg4: var(--border-strong);
+  --lk-bg5: var(--input-border);
+  --lk-fg: var(--text);
+  --lk-fg2: var(--text-secondary);
+  --lk-fg3: var(--text-muted);
+  --lk-border-color: var(--border);
+  --lk-accent-fg: var(--on-accent);
+  --lk-accent-bg: var(--accent);
+  --lk-accent2: var(--accent-hover);
+  --lk-danger-fg: var(--background);
+  --lk-danger: var(--danger);
+  --lk-danger-text: var(--danger);
+  --lk-border-radius: 12px;
+  --lk-box-shadow: var(--elev-md);
+  --lk-font-family: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
+  --lk-font-size: 0.9375rem;
+  --lk-grid-gap: 0.75rem;
+  --lk-control-bar-height: 4.5rem;
+}
+.cloqui-lk .lk-button,
+.cloqui-lk .lk-start-audio-button,
+.cloqui-lk .lk-chat-toggle,
+.cloqui-lk .lk-disconnect-button {
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--radius-md);
+}
+.cloqui-lk .lk-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.cloqui-lk .lk-participant-tile {
+  border-radius: var(--radius-lg);
+}
+/* Labels and buttons on top of video are always light on dark, in both themes. */
+.cloqui-lk .lk-participant-metadata-item,
+.cloqui-lk .lk-focus-toggle-button {
+  color: #e8edf5;
+  background-color: rgb(14 20 32 / 0.72);
+}
+
 /* Viewer-email watermark: hops between four spots so it can't be cropped out of one corner. */
 @keyframes cloqui-watermark {
   0%,

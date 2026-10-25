@@ -56,6 +56,17 @@ Cloud Run Job: "media" (ffmpeg: WebM → MP4, thumbnails; transcription behind a
 
 **Bucket layout:** `ws/<workspace>/videos/<video>/{original.webm, playback.mp4, thumb.jpg, thumb-custom.jpg, captions.vtt}`.
 
+## Live rooms
+
+- **Media:** runs on LiveKit (a WebRTC server; the dev server locally, LiveKit Cloud or self-hosted in production). The LiveKit room name is our room id.
+- **Who may join:** decided by `public.live_room_role(id)`, which returns `host`, `cohost`, `participant` or nothing. Invites go to accounts or emails; "everyone in the workspace" is optional.
+- **Join flow:**
+  1. The client calls `joinAction`, which runs `tokenFor()`.
+  2. Hosts get a token straight away. Others are queued by `request_live_admission()`: waiting, admitted, denied or removed.
+  3. Waiting clients poll every 2.5 s and connect once admitted.
+- **Host controls** go through LiveKit's server API: remove participant, mute published microphone tracks, delete room. Lock and end are stored in Postgres too, so they hold for future joins.
+- **Live now:** connected clients send a heartbeat every minute. A room counts as live if someone sent one in the last 2 minutes.
+
 ## Next.js 16 notes
 
 - `cacheComponents` and `partialPrefetching` are on. Anything that reads the session (cookies) renders inside a `<Suspense>` boundary. Cached functions take a user id, never a raw session or email (cache keys are stored in plain text).

@@ -6,6 +6,7 @@ import { AccessChip } from "@/components/privacy/access-chip"
 import { requireUser } from "@/server/auth"
 import { getWorkspaceAccess, roleCan } from "@/server/authz"
 import { VideoCard } from "@/components/video/video-card"
+import { liveNow } from "@/server/live"
 import { listLibrary } from "@/server/videos"
 import { listMembers } from "@/server/workspaces"
 
@@ -15,9 +16,10 @@ export default async function WorkspaceHome({ params }: PageProps<"/w/[slug]">) 
   const access = await getWorkspaceAccess(user, slug)
   if (!access) return null // The layout already shows the access-denied screen.
 
-  const [members, recent] = await Promise.all([
+  const [members, recent, live] = await Promise.all([
     listMembers(user, slug),
     listLibrary(user, slug, "all", 6),
+    liveNow(user, slug),
   ])
   const firstName = user.displayName.split(" ")[0]
   const canInvite = roleCan(access.role, "members.invite")
@@ -106,11 +108,35 @@ export default async function WorkspaceHome({ params }: PageProps<"/w/[slug]">) 
             <h2 id="live-title" className="mb-4 text-title-3 font-medium">
               Live now
             </h2>
-            <EmptyState
-              icon={Radio}
-              title="Nobody is live"
-              body="Live rooms you're invited to show up here."
-            />
+            {live.length > 0 ? (
+              <ul className="grid gap-2">
+                {live.map((r) => (
+                  <li key={r.id}>
+                    <Link
+                      href={`/live/${r.id}`}
+                      className="flex min-h-14 items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 hover:bg-raised"
+                    >
+                      <span
+                        aria-hidden
+                        className="size-2 shrink-0 animate-calm-pulse rounded-full bg-danger"
+                      />
+                      <span className="min-w-0 flex-1 truncate text-callout font-medium">
+                        {r.title}
+                      </span>
+                      <span className="text-caption font-medium tracking-[0.06em] text-danger-ink uppercase">
+                        Live
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState
+                icon={Radio}
+                title="Nobody is live"
+                body="Live rooms you're invited to show up here."
+              />
+            )}
           </section>
           <section aria-labelledby="tasks-title">
             <h2 id="tasks-title" className="mb-4 text-title-3 font-medium">

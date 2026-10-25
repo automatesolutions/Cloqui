@@ -41,6 +41,14 @@ What Cloqui protects, how, and what it does **not** claim. Keep this honest. If 
 - **Audit trail per video:** uploads, views (at most one logged per person every 30 minutes), sharing changes, requests and passcode failures. Visible to the owner and workspace admins. Nobody can edit it.
 - **Limits stated in the UI:** view-only hides downloads but can't stop screen recording, and the watermark discourages leaks but can't prevent them.
 
+## Live rooms
+
+- **Tokens are the only way in.** LiveKit join tokens are minted in one place (`tokenFor` in `src/server/live.ts`), only after `public.live_room_role()` allows it and the waiting room has admitted the person. Each token lasts 10 minutes, covers exactly one room, and gives admin rights only to hosts and co-hosts.
+- **Waiting room on by default.** People can't admit themselves. The admissions table only accepts host decisions, and permission tests check this.
+- **Remove means gone.** A removed person is disconnected at once and marked `removed`, so they can't get a new token for that room. Locking a room keeps out anyone not already admitted. Ending a room deletes it on the media server.
+- **Encryption:** media is encrypted in transit (WebRTC DTLS-SRTP) between each person and the LiveKit server. It is not end-to-end encrypted. In-room chat goes over the same connection and isn't stored by Cloqui.
+- **Recording live rooms is "Coming later".** It needs LiveKit Egress, which may not be on the free tier. We'll ask before adding anything paid.
+
 ## Content Security Policy
 
 Set in `next.config.ts`. It blocks other origins for scripts, frames, plugins and form posts, and forbids framing Cloqui (`frame-ancestors 'none'`).

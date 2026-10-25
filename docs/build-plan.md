@@ -1,6 +1,11 @@
 # Cloqui build plan
 
-Status: Phases 0, 1 and 2 done (2026-10-26).
+Status: Phases 0, 1, 2 and 3 done (2026-10-26).
+
+Phase 3 changes from the plan:
+
+- Recording live rooms to the library is marked "Coming later" in the UI. It needs LiveKit Egress: we check the free tier and ask before anything paid.
+- Production needs a LiveKit project, either LiveKit Cloud's free tier or self-hosted. That's a sign-up only Jonel can do, at deploy time.
 
 Phase 2 changes from the plan:
 

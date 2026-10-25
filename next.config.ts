@@ -5,6 +5,9 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:55321
 const supabaseWs = supabase.replace(/^http/, "ws")
 // Private bucket (R2 in production). Signed URLs only; this just lets the browser load them.
 const storage = new URL(process.env.S3_ENDPOINT ?? "http://127.0.0.1:55321").origin
+// LiveKit signalling (WebSocket) and its HTTP fallback.
+const livekit = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? "ws://127.0.0.1:7880"
+const livekitHttp = livekit.replace(/^ws/, "http")
 
 // Static CSP: nonces are incompatible with Partial Prerendering (Cache Components), so inline
 // scripts are allowed. Everything else is locked to our own origin and named services.
@@ -15,7 +18,7 @@ const csp = [
   `img-src 'self' blob: data: ${storage}`,
   "font-src 'self'",
   `media-src 'self' blob: ${storage}`,
-  `connect-src 'self' ${supabase} ${supabaseWs} ${storage}`,
+  `connect-src 'self' ${supabase} ${supabaseWs} ${storage} ${livekit} ${livekitHttp}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

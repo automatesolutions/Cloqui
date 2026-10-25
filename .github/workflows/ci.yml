@@ -38,6 +38,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:start
+      - run: pnpm live:start
       - run: pnpm env:local
       - run: pnpm test:permissions
       - run: pnpm exec playwright install --with-deps chromium

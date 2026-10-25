@@ -20,12 +20,16 @@
     "db:studio": "drizzle-kit studio",
     "env:local": "node scripts/env-local.mjs",
     "worker": "node --experimental-strip-types --no-warnings=ExperimentalWarning media/worker.ts",
-    "worker:once": "node --experimental-strip-types --no-warnings=ExperimentalWarning media/worker.ts --once"
+    "worker:once": "node --experimental-strip-types --no-warnings=ExperimentalWarning media/worker.ts --once",
+    "live:start": "docker run -d --rm --name cloqui-livekit -p 7880:7880 -p 7881:7881 -p 7882:7882/udp livekit/livekit-server:latest --dev --bind 0.0.0.0 --node-ip 127.0.0.1",
+    "live:stop": "docker stop cloqui-livekit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
     "@aws-sdk/s3-request-presigner": "^3.1156.0",
     "@gsap/react": "^2.1.2",
+    "@livekit/components-react": "^2.9.24",
+    "@livekit/components-styles": "^1.2.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "class-variance-authority": "^0.7.1",
@@ -33,6 +37,8 @@
     "cn": "^0.5.0",
     "drizzle-orm": "^0.45.4",
     "gsap": "^3.15.0",
+    "livekit-client": "^2.23.0",
+    "livekit-server-sdk": "^2.19.2",
     "lucide-react": "^1.61.0",
     "next": "16.4.3",
     "next-themes": "^0.4.6",
