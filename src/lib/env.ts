@@ -27,4 +27,10 @@ const schema = z.object({
   NEXT_PUBLIC_AUTH_MICROSOFT: z.enum(["true", "false"]).default("false"),
 })
 
-export const env = schema.parse(process.env)
+// `next build` loads every route module, but server secrets only exist at runtime (Cloud Run
+// injects them), so the build skips the check. The running server still checks everything.
+const building = process.env.NEXT_PHASE === "phase-production-build"
+
+const present = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== ""))
+
+export const env = (building ? schema.partial().parse(present) : schema.parse(process.env)) as z.infer<typeof schema>

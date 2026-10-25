@@ -80,5 +80,3 @@ export async function deleteObjects(keys: string[]) {
   if (Objects.length) await s3.send(new DeleteObjectsCommand({ Bucket, Delete: { Objects } }))
 }
 
-/** Origin of the bucket endpoint, for the Content-Security-Policy. */
-export const storageOrigin = new URL(env.S3_ENDPOINT).origin

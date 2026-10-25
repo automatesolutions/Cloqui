@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { relativeDate } from "@/lib/format"
 import { listMySessions } from "@/server/account"
 import { requireUser } from "@/server/auth"
-import { DeleteAccountSection, TwoFactorSection } from "./account-sections"
+import { DeleteAccountSection, NameForm, TwoFactorSection } from "./account-sections"
 
 export const metadata: Metadata = { title: "Account and security" }
 
@@ -48,6 +48,11 @@ async function Body() {
             {user.displayName} · {user.email}
           </p>
         </div>
+
+        <section aria-labelledby="you-h" className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6">
+          <h2 id="you-h" className="text-title-3 font-medium">Profile</h2>
+          <NameForm name={user.displayName} />
+        </section>
 
         <section aria-labelledby="tfa-h" className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6">
           <h2 id="tfa-h" className="text-title-3 font-medium">Two-step sign-in</h2>

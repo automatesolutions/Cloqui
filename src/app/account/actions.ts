@@ -2,11 +2,14 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { eq } from "drizzle-orm"
 import { z } from "zod"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
-import { safeNext } from "@/lib/validation"
+import { displayNameSchema, safeNext, type FormState } from "@/lib/validation"
 import { deleteMyAccount } from "@/server/account"
 import { isTwoFactorPending, requireUser } from "@/server/auth"
+import { withRls } from "@/server/db"
+import { profiles } from "@/server/db/schema"
 import { UserFacingError } from "@/server/workspaces"
 
 type Result<T = object> = ({ ok: true } & T) | { ok: false; message: string }
@@ -80,4 +83,16 @@ export async function deleteAccountAction(confirmEmail: string): Promise<Result>
   const supabase = await createSupabaseServerClient()
   await supabase.auth.signOut()
   redirect("/?deleted=1")
+}
+
+/** Your name, as everyone in your workspaces sees it. */
+export async function updateNameAction(_: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser("/account")
+  const parsed = displayNameSchema.safeParse(formData.get("displayName"))
+  if (!parsed.success) return { fieldErrors: { displayName: parsed.error.issues[0]?.message } }
+  await withRls(user.claims, (tx) =>
+    tx.update(profiles).set({ displayName: parsed.data }).where(eq(profiles.id, user.id))
+  )
+  revalidatePath("/", "layout")
+  return { ok: true, message: "Saved." }
 }

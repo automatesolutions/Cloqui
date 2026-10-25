@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useActionState, useState, useTransition } from "react"
 import { ShieldCheck, ShieldOff } from "lucide-react"
 import { toast } from "sonner"
 import { Field, FormMessage } from "@/components/forms/field"
@@ -15,7 +15,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { confirmTwoFactorAction, deleteAccountAction, disableTwoFactorAction, startTwoFactorAction } from "./actions"
+import {
+  confirmTwoFactorAction,
+  deleteAccountAction,
+  disableTwoFactorAction,
+  startTwoFactorAction,
+  updateNameAction,
+} from "./actions"
 
 export function TwoFactorSection({ enabled }: { enabled: boolean }) {
   const [setup, setSetup] = useState<{ factorId: string; qr: string; secret: string } | null>(null)
@@ -166,5 +172,26 @@ export function DeleteAccountSection({ email }: { email: string }) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  )
+}
+
+export function NameForm({ name }: { name: string }) {
+  const [state, formAction, pending] = useActionState(updateNameAction, {})
+  return (
+    <form action={formAction} className="grid max-w-sm gap-3">
+      <FormMessage message={state.message} tone={state.ok ? "info" : "error"} />
+      <Field
+        name="displayName"
+        label="Your name"
+        defaultValue={name}
+        autoComplete="name"
+        required
+        error={state.fieldErrors?.displayName}
+        help="Everyone in your workspaces sees this name."
+      />
+      <Button type="submit" variant="secondary" className="justify-self-start" loading={pending}>
+        Save
+      </Button>
+    </form>
   )
 }

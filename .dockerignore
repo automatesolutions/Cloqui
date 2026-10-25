@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+.claude
+.env*
+!.env.example
+test-results
+playwright-report
+coverage
+supabase/.temp
+supabase/.branches
+*.log
