@@ -27,7 +27,7 @@ export function AccessChip({
       className={cn(
         "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-sm px-2 text-caption font-medium whitespace-nowrap",
         scope === "private"
-          ? "bg-brand-soft text-brand"
+          ? "bg-brand-soft text-brand-ink"
           : "border border-border bg-raised text-fg-secondary",
         className
       )}

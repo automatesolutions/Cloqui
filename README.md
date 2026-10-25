@@ -11,11 +11,12 @@ Cloqui is a private-by-default app for screen and camera videos, live rooms, tea
 You need Node 22+, pnpm 9+, and Docker Desktop (running).
 
 1. Install dependencies: `pnpm install`
-2. Copy the env file: `cp .env.example .env.local`
-3. Start local Supabase (Postgres, Auth, Realtime, Mailpit): `pnpm db:start`
-4. Paste the `anon key` and `service_role key` it prints into `.env.local`.
-5. Start the app: `pnpm dev`, then open http://localhost:3000.
-6. Sign-up emails land in Mailpit at http://127.0.0.1:54324.
+2. Start local Supabase (Postgres, Auth, Realtime, Mailpit): `pnpm db:start`
+3. Write `.env.local` from the local stack: `pnpm env:local`
+4. Start the app: `pnpm dev`, then open http://localhost:3000.
+5. Emails (sign-up, invites) land in the local inbox at http://127.0.0.1:55324. Nothing leaves your machine.
+
+Local Supabase uses ports 55320–55329, because Windows reserves the default 543xx range when Hyper-V or WSL is on.
 
 ## Checks
 

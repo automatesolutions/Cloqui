@@ -24,12 +24,28 @@ What Cloqui protects, how, and what it does **not** claim. Keep this honest. If 
 | Passwords                              | Minimum 10 characters with upper, lower and digits; email confirmation; re-authentication before a password change (`supabase/config.toml`) |
 | 2FA                                    | TOTP via Supabase Auth                                                                                                                      |
 | CSRF                                   | Server actions check the Origin header (built in). Route handlers that change data check Origin too.                                        |
-| XSS                                    | React escaping, no `dangerouslySetInnerHTML` on user content, rich text sanitized on the server, strict CSP                                 |
+| XSS                                    | React escaping, no `dangerouslySetInnerHTML` on user content, rich text sanitized on the server, CSP (see below)                            |
 | Input validation                       | Zod schemas on every server action and route handler                                                                                        |
 | Rate limiting                          | Supabase Auth limits, plus a Postgres token bucket on invites, access requests and uploads                                                  |
 | Secrets                                | Env vars only (Secret Manager in production). `.env*` is ignored except `.env.example`.                                                     |
 | Logs                                   | No tokens, passwords, passcodes, signed URLs or message content in logs                                                                     |
 | Indexing                               | `noindex` on everything except the landing page                                                                                             |
+
+## Content Security Policy
+
+Set in `next.config.ts`. It blocks other origins for scripts, frames, plugins and form posts, and forbids framing Cloqui (`frame-ancestors 'none'`).
+
+**Known limit:** it allows inline scripts (`'unsafe-inline'`). Nonce-based CSP doesn't work with Partial Prerendering, which Cache Components turns on. So the main XSS defence is React's escaping and never rendering user HTML unsanitized. Revisit this when Next.js supports hash-based CSP for prerendered pages (its SRI option is still experimental).
+
+## Sessions and auth
+
+- Sessions live in HTTP-only Supabase cookies, refreshed by `src/proxy.ts`.
+- The server trusts only verified JWT claims (`getClaims()`), never the client.
+- Anything that reads the session is request-time only (`connection()`), so it's never baked into a cached or prerendered page.
+- Email links use one-time `token_hash` links that work on any device and expire in 1 hour.
+- Passwords are checked against known breaches with the Have I Been Pwned range API. Only the first 5 characters of the password's SHA-1 hash leave the server.
+- Sign-in, magic-link and reset forms give the same answer whether or not an account exists.
+- Invite links carry a 256-bit token. Only its SHA-256 hash is stored. The link works once, only for the invited email, and expires after 14 days.
 
 ## Fonts
 

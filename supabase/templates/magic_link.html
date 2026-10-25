@@ -1,0 +1,36 @@
+<div
+  style="
+    font-family:
+      system-ui,
+      -apple-system,
+      &quot;Segoe UI&quot;,
+      sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #131a28;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px;
+  "
+>
+  <p style="font-size: 20px; font-weight: 700; margin: 0 0 16px">Cloqui</p>
+  <p>Here's your link to sign in to Cloqui. It works once and expires in 1 hour.</p>
+  <p>
+    <a
+      href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email"
+      style="
+        display: inline-block;
+        background: #0b7a60;
+        color: #ffffff;
+        padding: 12px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 500;
+      "
+      >Sign in to Cloqui</a
+    >
+  </p>
+  <p style="color: #4f5b72; font-size: 14px">
+    If you didn't ask for this, you can ignore it. Your account stays locked.
+  </p>
+</div>

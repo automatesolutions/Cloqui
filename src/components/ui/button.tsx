@@ -17,7 +17,7 @@ const buttonVariants = cva(
           "border-border-strong bg-surface text-fg hover:bg-raised aria-expanded:bg-raised",
         ghost:
           "text-fg-secondary hover:bg-raised hover:text-fg aria-expanded:bg-raised aria-expanded:text-fg",
-        destructive: "bg-danger-soft text-danger hover:bg-danger/20",
+        destructive: "bg-danger-soft text-danger-ink hover:bg-danger/20",
         danger: "bg-danger text-background hover:bg-danger/90",
         link: "h-auto px-0 text-brand underline-offset-4 hover:underline",
       },
@@ -80,7 +80,7 @@ function Button({
           <span
             className={cn(
               "inline-flex items-center gap-2",
-              loading && "invisible"
+              loading && "opacity-0"
             )}
           >
             {children}

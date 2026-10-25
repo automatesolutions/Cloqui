@@ -11,14 +11,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run --project unit",
-    "test:permissions": "vitest run --project permissions --passWithNoTests",
+    "test:permissions": "vitest run --project permissions",
     "test:e2e": "playwright test",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "db:start": "supabase start",
+    "db:start": "supabase start -x studio,imgproxy,edge-runtime,logflare,vector",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "db:generate": "drizzle-kit generate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "env:local": "node scripts/env-local.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

@@ -3,11 +3,18 @@ import { expect, type Page } from "@playwright/test"
 
 /** WCAG 2.2 AA via axe. Runs on whatever theme the project uses. */
 export async function expectAccessible(page: Page) {
+  // Let entrance animations settle: half-faded text would fail contrast for the wrong reason.
+  // Only visible ones: Next keeps recently visited pages mounted but hidden (React <Activity>).
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll("[data-reveal]")]
+      .filter((el) => el.checkVisibility())
+      .every((el) => getComputedStyle(el).opacity === "1")
+  )
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze()
   const summary = results.violations.map(
-    (v) => `${v.id} (${v.impact}): ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`
+    (v) => `${v.id} (${v.impact}): ${v.nodes.map((n) => n.html.slice(0, 160)).join(" | ")}`
   )
   expect(summary, "axe violations").toEqual([])
 }

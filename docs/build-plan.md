@@ -1,6 +1,6 @@
 # Cloqui build plan
 
-Status: draft, 2026-10-25. Each phase starts only after Jonel says "go". Each step inside a phase ends with lint, type-check and tests passing, plus a two-sentence summary.
+Status: Phase 0 and Phase 1 done (2026-10-26). Jonel said "proceed all": phases run back to back, stopping only for paid services or accounts only Jonel can create. Each step ends with lint, type-check and tests passing.
 
 ## Architecture at a glance
 

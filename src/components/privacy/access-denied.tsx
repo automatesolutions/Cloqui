@@ -27,10 +27,13 @@ export function ClosedDoorArt({ className }: { className?: string }) {
  */
 export function AccessDenied({
   ownerName,
+  body,
   requestAction,
   requested = false,
 }: {
   ownerName?: string
+  /** Overrides the "Only people … invited can open it." line. */
+  body?: string
   requestAction?: () => Promise<void>
   requested?: boolean
 }) {
@@ -39,9 +42,10 @@ export function AccessDenied({
       <ClosedDoorArt className="mb-5 h-24 w-30" />
       <h1 className="text-title-3 font-medium">You don&apos;t have access to this</h1>
       <p className="mt-2 text-callout text-fg-secondary">
-        {ownerName
-          ? `Only people ${ownerName} invited can open it.`
-          : "Only invited people can open it."}
+        {body ??
+          (ownerName
+            ? `Only people ${ownerName} invited can open it.`
+            : "Only invited people can open it.")}
       </p>
       <div className="mt-6 flex w-full max-w-[260px] flex-col gap-2">
         {requested ? (
@@ -58,7 +62,7 @@ export function AccessDenied({
           )
         )}
         <Button variant="ghost" asChild>
-          <Link href="/">Go to Home</Link>
+          <Link href="/home">Go to Home</Link>
         </Button>
       </div>
     </div>

@@ -8,12 +8,12 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-brand-soft text-brand",
-        private: "bg-brand-soft text-brand",
+        default: "bg-brand-soft text-brand-ink",
+        private: "bg-brand-soft text-brand-ink",
         workspace: "border-border bg-raised text-fg-secondary",
         attention: "bg-attention-soft text-attention",
-        destructive: "bg-danger-soft text-danger",
-        live: "bg-danger-soft text-danger tracking-[0.06em] uppercase",
+        destructive: "bg-danger-soft text-danger-ink",
+        live: "bg-danger-soft text-danger-ink tracking-[0.06em] uppercase",
         secondary: "border-border bg-raised text-fg-secondary",
         outline: "border-border-strong text-fg",
       },

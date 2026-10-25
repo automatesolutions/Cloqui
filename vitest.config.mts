@@ -2,7 +2,11 @@ import { defineConfig } from "vitest/config"
 import react from "@vitejs/plugin-react"
 import { fileURLToPath } from "node:url"
 
-const alias = { "@": fileURLToPath(new URL("./src", import.meta.url)) }
+const alias = {
+  "@": fileURLToPath(new URL("./src", import.meta.url)),
+  // server-only throws outside a React Server environment; tests import server modules directly.
+  "server-only": fileURLToPath(new URL("./tests/stubs/server-only.ts", import.meta.url)),
+}
 
 export default defineConfig({
   plugins: [react()],

@@ -183,7 +183,7 @@ function HowSharingWorks() {
               className="rounded-lg border border-border bg-surface p-6 shadow-sm"
             >
               <div className="flex items-center gap-3">
-                <span className="grid size-10 place-items-center rounded-md bg-brand-soft text-brand">
+                <span className="grid size-10 place-items-center rounded-md bg-brand-soft text-brand-ink">
                   <step.icon aria-hidden className="size-5" strokeWidth={1.75} />
                 </span>
                 <span className="text-footnote text-fg-muted tnum">Step {i + 1}</span>
@@ -275,7 +275,7 @@ function RecordVisual() {
             key={m}
             className={
               i === 2
-                ? "rounded-md border border-brand bg-brand-soft px-3 py-3 text-center text-callout font-medium text-brand"
+                ? "rounded-md border border-brand bg-brand-soft px-3 py-3 text-center text-callout font-medium text-brand-ink"
                 : "rounded-md border border-border-strong px-3 py-3 text-center text-callout text-fg-secondary"
             }
           >

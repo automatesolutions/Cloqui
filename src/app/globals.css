@@ -38,6 +38,9 @@
   --color-brand-hover: var(--accent-hover);
   --color-on-brand: var(--on-accent);
   --color-brand-soft: var(--accent-soft);
+  /* Text that sits on a *-soft tint. Darker than the base colour in light mode for 4.5:1. */
+  --color-brand-ink: var(--accent-ink);
+  --color-danger-ink: var(--danger-ink);
   --color-attention: var(--attention);
   --color-attention-soft: var(--attention-soft);
   --color-danger: var(--danger);
@@ -104,10 +107,12 @@
   --accent-hover: #5ce0bd;
   --on-accent: #04241b;
   --accent-soft: rgb(45 212 168 / 0.12);
+  --accent-ink: #2dd4a8;
   --attention: #f2b54a;
   --attention-soft: rgb(242 181 74 / 0.12);
   --danger: #f27c7c;
   --danger-soft: rgb(242 124 124 / 0.12);
+  --danger-ink: #f27c7c;
   --scrim: rgb(14 20 32 / 0.72);
   --elev-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --elev-md: 0 4px 16px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.04);
@@ -129,10 +134,12 @@
   --accent-hover: #09664f;
   --on-accent: #ffffff;
   --accent-soft: rgb(11 122 96 / 0.1);
+  --accent-ink: #09664f;
   --attention: #935400;
   --attention-soft: rgb(147 84 0 / 0.1);
   --danger: #c03538;
   --danger-soft: rgb(192 53 56 / 0.1);
+  --danger-ink: #a52b2f;
   --scrim: rgb(19 26 40 / 0.4);
   --elev-sm: 0 1px 2px rgb(19 26 40 / 0.06);
   --elev-md: 0 4px 16px rgb(19 26 40 / 0.08), 0 1px 3px rgb(19 26 40 / 0.06);

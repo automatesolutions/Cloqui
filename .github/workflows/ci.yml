@@ -25,10 +25,10 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
 
-  permissions:
-    # Proves that uninvited people can't read videos, channels or tasks (RLS + authz).
+  # Proves uninvited people can't read anything (RLS + authz), then runs the browser journeys.
+  integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -37,20 +37,9 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor
+      - run: pnpm db:start
+      - run: pnpm env:local
       - run: pnpm test:permissions
-
-  e2e:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
       - run: pnpm test:e2e

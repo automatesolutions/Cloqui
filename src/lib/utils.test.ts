@@ -1,10 +1,18 @@
 import { describe, expect, it } from "vitest"
 import { cn } from "./utils"
 
+// Class order doesn't matter to the browser (and Prettier re-sorts literals), so compare as sets.
+const classes = (s: string) => s.split(" ").sort()
+
 describe("cn", () => {
   it("keeps a text colour next to a Cloqui font size", () => {
-    expect(cn("text-callout text-on-brand")).toBe("text-on-brand text-callout")
-    expect(cn("text-footnote text-fg-secondary")).toBe("text-fg-secondary text-footnote")
+    const pairs = [
+      ["text-on-brand", "text-callout"],
+      ["text-fg-secondary", "text-footnote"],
+    ]
+    for (const [color, size] of pairs) {
+      expect(classes(cn(color, size))).toEqual(classes(`${color} ${size}`))
+    }
   })
 
   it("still lets a later font size win over an earlier one", () => {
