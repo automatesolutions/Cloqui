@@ -6,6 +6,11 @@ export const limits = {
   invite: { capacity: 30, perHour: 30 },
   accessRequest: { capacity: 5, perHour: 10 },
   createWorkspace: { capacity: 5, perHour: 5 },
+  upload: { capacity: 50, perHour: 50 },
+  // 5 tries, then one more every 5 minutes.
+  passcode: { capacity: 5, perHour: 12 },
+  // One "viewed" audit event per person per video every 30 minutes.
+  viewLog: { capacity: 1, perHour: 2 },
 } as const
 
 /** Token bucket in Postgres. Returns true when allowed. Keys must not contain personal data. */

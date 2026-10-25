@@ -1,6 +1,12 @@
 # Cloqui build plan
 
-Status: Phase 0 and Phase 1 done (2026-10-26). Jonel said "proceed all": phases run back to back, stopping only for paid services or accounts only Jonel can create. Each step ends with lint, type-check and tests passing.
+Status: Phases 0, 1 and 2 done (2026-10-26).
+
+Phase 2 changes from the plan:
+
+- Uploads are a single presigned PUT (up to 2 GB), retried from the start if they fail. Resumable multipart uploads come later.
+- "Use this frame as thumbnail" is cut by the worker on the server, not drawn in the browser. That avoids needing CORS on the private bucket.
+- Transcription is wired up (whisper.cpp in the worker, captions in the player) but off until `TRANSCRIPTION_ENABLED=true` plus a model are configured. Jonel said "proceed all": phases run back to back, stopping only for paid services or accounts only Jonel can create. Each step ends with lint, type-check and tests passing.
 
 ## Architecture at a glance
 

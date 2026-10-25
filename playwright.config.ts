@@ -13,7 +13,14 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
-    launchOptions: { args: ["--disable-gpu"] },
+    // Fake camera and microphone so recording can be tested headless.
+    launchOptions: {
+      args: [
+        "--disable-gpu",
+        "--use-fake-ui-for-media-stream",
+        "--use-fake-device-for-media-stream",
+      ],
+    },
   },
   projects: [
     { name: "desktop-dark", use: { ...devices["Desktop Chrome"], colorScheme: "dark" } },

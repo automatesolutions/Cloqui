@@ -31,6 +31,16 @@ What Cloqui protects, how, and what it does **not** claim. Keep this honest. If 
 | Logs                                   | No tokens, passwords, passcodes, signed URLs or message content in logs                                                                     |
 | Indexing                               | `noindex` on everything except the landing page                                                                                             |
 
+## Videos and sharing
+
+- **Private by default.** A new video is visible only to its owner. Sharing means naming people (or turning on "everyone in the workspace"). There is no public or "anyone with the link" option anywhere in the schema.
+- **One access rule in the database.** `public.video_role()` backs both RLS and the app. Permission tests cover the outsider, colleague, admin, guest, removed, expired, passcode and deleted cases (`tests/permissions/videos.test.ts`).
+- **Short-lived links.** Video and image URLs are signed for 5 minutes and renewed only after a fresh access check. A copied link stops working within minutes.
+- **Passcodes** are stored as scrypt hashes, compared in constant time, and rate limited to 5 tries and then 1 every 5 minutes. Wrong attempts are logged.
+- **Access requests** can't be used to probe for videos: asking about an id that doesn't exist looks the same as asking about one that does. A denied person only learns the owner's first name.
+- **Audit trail per video:** uploads, views (at most one logged per person every 30 minutes), sharing changes, requests and passcode failures. Visible to the owner and workspace admins. Nobody can edit it.
+- **Limits stated in the UI:** view-only hides downloads but can't stop screen recording, and the watermark discourages leaks but can't prevent them.
+
 ## Content Security Policy
 
 Set in `next.config.ts`. It blocks other origins for scripts, frames, plugins and form posts, and forbids framing Cloqui (`frame-ancestors 'none'`).

@@ -211,6 +211,35 @@
   animation: cloqui-pulse 2s ease-in-out infinite;
 }
 
+/* Viewer-email watermark: hops between four spots so it can't be cropped out of one corner. */
+@keyframes cloqui-watermark {
+  0%,
+  24% {
+    top: 8%;
+    left: 6%;
+  }
+  25%,
+  49% {
+    top: 70%;
+    left: 52%;
+  }
+  50%,
+  74% {
+    top: 38%;
+    left: 22%;
+  }
+  75%,
+  100% {
+    top: 14%;
+    left: 58%;
+  }
+}
+.cloqui-watermark {
+  top: 8%;
+  left: 6%;
+  animation: cloqui-watermark 28s steps(1, end) infinite;
+}
+
 /* Hero reveal: hidden until GSAP runs; reveals on its own after 1.5 s if it never does */
 @keyframes cloqui-reveal-fallback {
   to {

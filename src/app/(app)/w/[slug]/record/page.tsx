@@ -1,10 +1,23 @@
-import { ComingLater } from "@/components/app/coming-later"
+import type { Metadata } from "next"
+import { PageHeader } from "@/components/app/page-header"
+import { Recorder } from "@/components/record/recorder"
+import { requireUser } from "@/server/auth"
+import { getWorkspaceAccess } from "@/server/authz"
 
-export default function RecordPage() {
+export const metadata: Metadata = { title: "Record" }
+
+export default async function RecordPage({ params }: PageProps<"/w/[slug]/record">) {
+  const { slug } = await params
+  const user = await requireUser(`/w/${slug}/record`)
+  const access = await getWorkspaceAccess(user, slug)
+  if (!access) return null
   return (
-    <ComingLater
-      title="Record"
-      body="Screen and camera recording arrives in the next phase of this build."
-    />
+    <>
+      <PageHeader
+        title="Record"
+        description="Your video stays private until you choose who can see it."
+      />
+      <Recorder slug={slug} workspaceName={access.workspace.name} />
+    </>
   )
 }

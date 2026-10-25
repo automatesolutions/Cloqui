@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { updateSession } from "@/lib/supabase/proxy"
 
 // Optimistic checks only. Real authorization happens next to the data (src/server/authz + RLS).
-const appPrefixes = ["/home", "/w/", "/onboarding", "/settings"]
+const appPrefixes = ["/home", "/w/", "/v/", "/shared", "/onboarding", "/settings"]
 const authPages = ["/sign-in", "/sign-up"]
 
 export async function proxy(request: NextRequest) {

@@ -3,6 +3,8 @@ import type { NextConfig } from "next"
 const isDev = process.env.NODE_ENV === "development"
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:55321"
 const supabaseWs = supabase.replace(/^http/, "ws")
+// Private bucket (R2 in production). Signed URLs only; this just lets the browser load them.
+const storage = new URL(process.env.S3_ENDPOINT ?? "http://127.0.0.1:55321").origin
 
 // Static CSP: nonces are incompatible with Partial Prerendering (Cache Components), so inline
 // scripts are allowed. Everything else is locked to our own origin and named services.
@@ -10,10 +12,10 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data:",
+  `img-src 'self' blob: data: ${storage}`,
   "font-src 'self'",
-  "media-src 'self' blob:",
-  `connect-src 'self' ${supabase} ${supabaseWs}`,
+  `media-src 'self' blob: ${storage}`,
+  `connect-src 'self' ${supabase} ${supabaseWs} ${storage}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

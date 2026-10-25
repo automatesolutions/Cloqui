@@ -21,13 +21,26 @@ export async function expectAccessible(page: Page) {
 
 /**
  * /hig: every visible control has a hit area of at least 44 x 44.
- * Inline links inside running text are exempt (WCAG 2.5.8 inline exception).
- * Dense controls (data-size sm / icon-sm) pad their hit area by 4 px per side with ::after.
+ * The hit area includes an absolutely positioned ::after that extends past the element
+ * (how dense buttons and switches pad their target without looking bigger).
+ * Exempt (WCAG 2.5.8): links inside running text, and controls marked data-inline-target.
  */
 export async function expectTapTargets(page: Page, min = 44) {
   const small = await page.evaluate((min) => {
     const sel =
-      "a[href], button, [role=button], input:not([type=hidden]), select, textarea, [role=checkbox], [role=switch], [role=tab]"
+      "a[href], button, [role=button], input:not([type=hidden]):not([type=checkbox]), select, textarea, [role=checkbox], [role=switch], [role=tab], [role=radio], [role=combobox]"
+    const hitArea = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect()
+      let w = r.width
+      let h = r.height
+      const a = getComputedStyle(el, "::after")
+      if (a.content !== "none" && a.position === "absolute") {
+        const out = (v: string) => Math.max(0, -parseFloat(v) || 0)
+        w += out(a.left) + out(a.right)
+        h += out(a.top) + out(a.bottom)
+      }
+      return { w, h }
+    }
     return [...document.querySelectorAll<HTMLElement>(sel)]
       .filter((el) => {
         const r = el.getBoundingClientRect()
@@ -35,13 +48,16 @@ export async function expectTapTargets(page: Page, min = 44) {
         const style = getComputedStyle(el)
         if (style.visibility === "hidden" || style.display === "none") return false
         if (el.closest("p") && el.tagName === "A") return false
-        if (el.closest(".sr-only")) return false
-        const pad = ["sm", "icon-sm", "xs", "icon-xs"].includes(el.dataset.size ?? "") ? 8 : 0
-        return r.width + pad < min || r.height + pad < min
+        if (el.closest(".sr-only") || el.closest("[data-inline-target]")) return false
+        // A control wrapped in a <label> uses the label as its target.
+        const label = el.closest("label")
+        const { w, h } = label ? hitArea(label) : hitArea(el)
+        return w < min || h < min
       })
       .map((el) => {
-        const r = el.getBoundingClientRect()
-        return `${el.tagName.toLowerCase()} "${(el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 40)}" ${Math.round(r.width)}x${Math.round(r.height)}`
+        const { w, h } = hitArea(el)
+        const name = el.getAttribute("aria-label") ?? el.textContent ?? el.id
+        return `${el.tagName.toLowerCase()} "${name.trim().slice(0, 40)}" ${Math.round(w)}x${Math.round(h)}`
       })
   }, min)
   expect(small, "controls smaller than 44 x 44").toEqual([])

@@ -5,6 +5,8 @@ import { EmptyState } from "@/components/app/empty-state"
 import { AccessChip } from "@/components/privacy/access-chip"
 import { requireUser } from "@/server/auth"
 import { getWorkspaceAccess, roleCan } from "@/server/authz"
+import { VideoCard } from "@/components/video/video-card"
+import { listLibrary } from "@/server/videos"
 import { listMembers } from "@/server/workspaces"
 
 export default async function WorkspaceHome({ params }: PageProps<"/w/[slug]">) {
@@ -13,7 +15,10 @@ export default async function WorkspaceHome({ params }: PageProps<"/w/[slug]">) 
   const access = await getWorkspaceAccess(user, slug)
   if (!access) return null // The layout already shows the access-denied screen.
 
-  const members = await listMembers(user, slug)
+  const [members, recent] = await Promise.all([
+    listMembers(user, slug),
+    listLibrary(user, slug, "all", 6),
+  ])
   const firstName = user.displayName.split(" ")[0]
   const canInvite = roleCan(access.role, "members.invite")
 
@@ -62,19 +67,39 @@ export default async function WorkspaceHome({ params }: PageProps<"/w/[slug]">) 
 
       <div className="grid gap-8">
         <section aria-labelledby="recent-title">
-          <h2 id="recent-title" className="mb-4 text-title-3 font-medium">
-            Recent videos
-          </h2>
-          <EmptyState
-            icon={Video}
-            title="No videos yet"
-            body="Record your screen or camera. Only the people you choose can watch it."
-            action={
-              <Button variant="secondary" asChild>
-                <Link href={`/w/${slug}/record`}>Record a video</Link>
-              </Button>
-            }
-          />
+          <div className="mb-4 flex items-baseline justify-between gap-4">
+            <h2 id="recent-title" className="text-title-3 font-medium">
+              Recent videos
+            </h2>
+            {recent.length > 0 && (
+              <Link
+                href={`/w/${slug}/library`}
+                className="inline-flex min-h-11 items-center text-callout font-medium text-brand-ink underline-offset-4 hover:underline"
+              >
+                See all
+              </Link>
+            )}
+          </div>
+          {recent.length > 0 ? (
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {recent.map((item) => (
+                <li key={item.id}>
+                  <VideoCard item={item} viewerId={user.id} workspaceName={access.workspace.name} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              icon={Video}
+              title="No videos yet"
+              body="Record your screen or camera. Only the people you choose can watch it."
+              action={
+                <Button variant="secondary" asChild>
+                  <Link href={`/w/${slug}/record`}>Record a video</Link>
+                </Button>
+              }
+            />
+          )}
         </section>
         <div className="grid gap-8 md:grid-cols-2">
           <section aria-labelledby="live-title">

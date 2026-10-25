@@ -15,6 +15,7 @@ You need Node 22+, pnpm 9+, and Docker Desktop (running).
 3. Write `.env.local` from the local stack: `pnpm env:local`
 4. Start the app: `pnpm dev`, then open http://localhost:3000.
 5. Emails (sign-up, invites) land in the local inbox at http://127.0.0.1:55324. Nothing leaves your machine.
+6. To turn recordings into MP4s with thumbnails, run `pnpm worker` in a second terminal. Without it, recordings still play in Chrome, Edge and Firefox.
 
 Local Supabase uses ports 55320–55329, because Windows reserves the default 543xx range when Hyper-V or WSL is on.
 

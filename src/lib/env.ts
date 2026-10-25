@@ -13,6 +13,13 @@ const schema = z.object({
   // "resend" in production. "mailpit" sends to the local inbox (pnpm db:start) and never leaves the machine.
   EMAIL_TRANSPORT: z.enum(["resend", "mailpit"]).default("resend"),
   MAILPIT_URL: z.url().optional().default("http://127.0.0.1:55324"),
+  S3_ENDPOINT: z.url(),
+  S3_REGION: z.string().default("auto"),
+  S3_BUCKET: z.string().default("cloqui-media"),
+  S3_ACCESS_KEY_ID: z.string().min(1),
+  S3_SECRET_ACCESS_KEY: z.string().min(1),
+  SIGNED_URL_TTL_SECONDS: z.coerce.number().int().min(30).max(3600).default(300),
+  TRANSCRIPTION_ENABLED: z.enum(["true", "false"]).default("false"),
   NEXT_PUBLIC_AUTH_GOOGLE: z.enum(["true", "false"]).default("false"),
   NEXT_PUBLIC_AUTH_MICROSOFT: z.enum(["true", "false"]).default("false"),
 })

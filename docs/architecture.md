@@ -22,6 +22,40 @@ Cloud Run Job: "media" (ffmpeg: WebM → MP4, thumbnails; transcription behind a
 3. Queries run through an RLS-aware Drizzle client: each request runs in a transaction with `set local role authenticated` and the user's JWT claims. Postgres row-level security then filters rows again. A missed `can()` check still can't return rows the user isn't allowed to see.
 4. Files (videos, attachments) are never public. The server checks access, then issues an R2 signed URL that lives for `SIGNED_URL_TTL_SECONDS` (default 300).
 
+## Videos
+
+**Who can see a video** is decided by one Postgres function, `public.video_role(id)`, which returns `owner`, `editor`, `viewer` or nothing. RLS policies and the app both call it.
+
+- **Owner:** always has access.
+- **Grants:** access goes to an account (`user_id`), or to an email with no account yet. That grant follows the person once they sign up with that email.
+- **Workspace-visible videos:** add "viewer" for full workspace members. Guests never get this.
+- **End date:** `access_expires_at` cuts off everyone except the owner.
+- **Admins:** workspace admins do **not** see private videos. They see the audit trail only.
+- **Passcode:** checked on top of the role. Unlocks are stored per person and per passcode version, so changing the passcode locks everyone out again.
+
+**Recording and upload:**
+
+1. The browser records with `MediaRecorder` (WebM or MP4, depending on the browser).
+2. A server action creates the video row and returns a presigned PUT URL (15 minutes). The browser uploads straight to the private bucket.
+3. A second action checks the object exists, sets `status = processing`, and queues a `media_jobs` row.
+4. Until the worker runs, the original file plays in browsers that support it.
+
+**Media worker** (`media/worker.ts`, a Cloud Run Job in production, `pnpm worker` locally):
+
+- Claims jobs with `FOR UPDATE SKIP LOCKED`, so several workers never take the same job.
+- `process` jobs: transcode to H.264/AAC MP4 with faststart, apply non-destructive trim points, cut a thumbnail, and measure duration and size.
+- `thumbnail` jobs: cut the frame the owner picked.
+- Optional captions run whisper.cpp when `TRANSCRIPTION_ENABLED=true`.
+- Failures retry up to 3 times with backoff, then the video is marked `failed`. The original stays playable.
+
+**Playback:**
+
+- The page issues signed GET URLs (5 minutes) for video, poster and captions after re-checking access.
+- The player renews them a minute before expiry through `GET /api/videos/[id]/playback`, which checks access again.
+- So removing someone's access stops their open player at the next renewal, at most 5 minutes later.
+
+**Bucket layout:** `ws/<workspace>/videos/<video>/{original.webm, playback.mp4, thumb.jpg, thumb-custom.jpg, captions.vtt}`.
+
 ## Next.js 16 notes
 
 - `cacheComponents` and `partialPrefetching` are on. Anything that reads the session (cookies) renders inside a `<Suspense>` boundary. Cached functions take a user id, never a raw session or email (cache keys are stored in plain text).
