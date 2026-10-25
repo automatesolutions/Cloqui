@@ -156,17 +156,15 @@ export async function createChannel(
     // so INSERT ... RETURNING would be refused by RLS.
     const ch = { id: crypto.randomUUID() }
     return await withRls(user.claims, async (tx) => {
-      await tx
-        .insert(chatChannels)
-        .values({
-          id: ch.id,
-          workspaceId: workspace.id,
-          kind: "channel",
-          name: input.name,
-          topic: input.topic,
-          isPrivate: input.isPrivate,
-          createdBy: user.id,
-        })
+      await tx.insert(chatChannels).values({
+        id: ch.id,
+        workspaceId: workspace.id,
+        kind: "channel",
+        name: input.name,
+        topic: input.topic,
+        isPrivate: input.isPrivate,
+        createdBy: user.id,
+      })
       await tx.insert(chatMembers).values({ channelId: ch.id, userId: user.id, role: "admin" })
       const others = [...new Set(input.memberIds)].filter((id) => id !== user.id)
       if (others.length)
@@ -750,17 +748,15 @@ export async function createAttachmentUpload(
   const key = `ws/${ch.ws}/chat/${channelId}/${id}`
   const type = file.mimeType.slice(0, 100) || "application/octet-stream"
   await withRls(user.claims, (tx) =>
-    tx
-      .insert(chatAttachments)
-      .values({
-        id,
-        channelId,
-        uploaderId: user.id,
-        objectKey: key,
-        name: safeName,
-        mimeType: type,
-        sizeBytes: file.sizeBytes,
-      })
+    tx.insert(chatAttachments).values({
+      id,
+      channelId,
+      uploaderId: user.id,
+      objectKey: key,
+      name: safeName,
+      mimeType: type,
+      sizeBytes: file.sizeBytes,
+    })
   )
   return { attachmentId: id, uploadUrl: await presignUpload(key, type), contentType: type }
 }

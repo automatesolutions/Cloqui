@@ -3,9 +3,10 @@
 import { useSelectedLayoutSegment } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-/** Chat needs the full width and height. Every other page keeps a comfortable reading width. */
+/** Chat and tasks need the full width and height. Every other page keeps a comfortable reading width. */
 export function MainFrame({ children }: { children: React.ReactNode }) {
-  const fullBleed = useSelectedLayoutSegment() === "chat"
+  const segment = useSelectedLayoutSegment()
+  const fullBleed = segment === "chat" || segment === "tasks"
   return (
     <main
       id="main"

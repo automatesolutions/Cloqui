@@ -6,7 +6,9 @@ import { AccessChip } from "@/components/privacy/access-chip"
 import { requireUser } from "@/server/auth"
 import { getWorkspaceAccess, roleCan } from "@/server/authz"
 import { VideoCard } from "@/components/video/video-card"
+import { DueDate } from "@/components/tasks/bits"
 import { liveNow } from "@/server/live"
+import { myTasks } from "@/server/tasks"
 import { listLibrary } from "@/server/videos"
 import { listMembers } from "@/server/workspaces"
 
@@ -16,10 +18,11 @@ export default async function WorkspaceHome({ params }: PageProps<"/w/[slug]">) 
   const access = await getWorkspaceAccess(user, slug)
   if (!access) return null // The layout already shows the access-denied screen.
 
-  const [members, recent, live] = await Promise.all([
+  const [members, recent, live, tasks] = await Promise.all([
     listMembers(user, slug),
     listLibrary(user, slug, "all", 6),
     liveNow(user, slug),
+    myTasks(user, slug, 5),
   ])
   const firstName = user.displayName.split(" ")[0]
   const canInvite = roleCan(access.role, "members.invite")
@@ -142,11 +145,32 @@ export default async function WorkspaceHome({ params }: PageProps<"/w/[slug]">) 
             <h2 id="tasks-title" className="mb-4 text-title-3 font-medium">
               My tasks
             </h2>
-            <EmptyState
-              icon={ListChecks}
-              title="Nothing assigned to you"
-              body="Tasks assigned to you show up here."
-            />
+            {tasks.length > 0 ? (
+              <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
+                {tasks.map((t) => (
+                  <li key={t.id}>
+                    <Link
+                      href={`/w/${slug}/tasks/${t.listId}?task=${t.id}`}
+                      className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 hover:bg-raised"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-callout font-medium">{t.title}</span>
+                        <span className="block truncate text-footnote text-fg-secondary">
+                          {t.listName}
+                        </span>
+                      </span>
+                      <DueDate date={t.dueDate} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState
+                icon={ListChecks}
+                title="Nothing assigned to you"
+                body="Tasks assigned to you show up here."
+              />
+            )}
           </section>
         </div>
       </div>

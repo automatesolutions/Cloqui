@@ -1,6 +1,12 @@
 # Cloqui build plan
 
-Status: Phases 0 through 4 done (2026-10-26).
+Status: Phases 0 through 5 done (2026-10-26).
+
+Phase 5 changes from the plan:
+
+- Lists can link to a channel. Tasks made from a chat message link to that message and its channel.
+- Due-date reminders compare dates in UTC. Per-workspace time zones come later.
+- Automations ("when status changes to X, notify Y") stay in Phase 6, as planned.
 
 Phase 4 changes from the plan:
 

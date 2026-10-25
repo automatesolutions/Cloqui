@@ -2,6 +2,7 @@
 import {
   bigint,
   boolean,
+  date,
   integer,
   customType,
   doublePrecision,
@@ -321,3 +322,157 @@ export const notifications = pgTable("notifications", {
   createdAt: ts("created_at").notNull().defaultNow(),
   readAt: ts("read_at"),
 })
+
+// ── Phase 5: tasks ──────────────────────────────────────────────────────────
+export const taskStatusKind = pgEnum("task_status_kind", ["todo", "in_progress", "done"])
+export const taskPriority = pgEnum("task_priority", ["urgent", "high", "normal", "low", "none"])
+export type TaskStatusKind = (typeof taskStatusKind.enumValues)[number]
+export type TaskPriority = (typeof taskPriority.enumValues)[number]
+
+export const taskSpaces = pgTable("task_spaces", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  name: text("name").notNull(),
+  isPrivate: boolean("is_private").notNull().default(false),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  archivedAt: ts("archived_at"),
+})
+
+export const taskSpaceMembers = pgTable(
+  "task_space_members",
+  {
+    spaceId: uuid("space_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    role: text("role").$type<"admin" | "member">().notNull().default("member"),
+  },
+  (t) => [primaryKey({ columns: [t.spaceId, t.userId] })]
+)
+
+export const taskLists = pgTable("task_lists", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  spaceId: uuid("space_id").notNull(),
+  name: text("name").notNull(),
+  channelId: uuid("channel_id"),
+  position: doublePrecision("position").notNull().default(0),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  archivedAt: ts("archived_at"),
+})
+
+export const taskStatuses = pgTable("task_statuses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  listId: uuid("list_id").notNull(),
+  name: text("name").notNull(),
+  kind: taskStatusKind("kind").notNull(),
+  position: doublePrecision("position").notNull(),
+})
+
+export const tasks = pgTable("tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  listId: uuid("list_id").notNull(),
+  parentId: uuid("parent_id"),
+  statusId: uuid("status_id").notNull(),
+  title: text("title").notNull(),
+  description: jsonb("description").$type<Record<string, unknown> | null>(),
+  priority: taskPriority("priority").notNull().default("none"),
+  startDate: date("start_date", { mode: "string" }),
+  dueDate: date("due_date", { mode: "string" }),
+  estimateMinutes: integer("estimate_minutes"),
+  position: doublePrecision("position").notNull().default(0),
+  videoId: uuid("video_id"),
+  sourceMessageId: uuid("source_message_id"),
+  channelId: uuid("channel_id"),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+  completedAt: ts("completed_at"),
+  archivedAt: ts("archived_at"),
+  dueSoonNotifiedAt: ts("due_soon_notified_at"),
+  overdueNotifiedAt: ts("overdue_notified_at"),
+})
+
+export const taskAssignees = pgTable(
+  "task_assignees",
+  {
+    taskId: uuid("task_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    assignedBy: uuid("assigned_by"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.taskId, t.userId] })]
+)
+
+export const taskLabels = pgTable("task_labels", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  spaceId: uuid("space_id").notNull(),
+  name: text("name").notNull(),
+  tone: text("tone")
+    .$type<"neutral" | "brand" | "attention" | "danger">()
+    .notNull()
+    .default("neutral"),
+})
+
+export const taskLabelLinks = pgTable(
+  "task_label_links",
+  { taskId: uuid("task_id").notNull(), labelId: uuid("label_id").notNull() },
+  (t) => [primaryKey({ columns: [t.taskId, t.labelId] })]
+)
+
+export const taskChecklistItems = pgTable("task_checklist_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id").notNull(),
+  body: text("body").notNull(),
+  done: boolean("done").notNull().default(false),
+  position: doublePrecision("position").notNull().default(0),
+})
+
+export const taskComments = pgTable("task_comments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id").notNull(),
+  authorId: uuid("author_id").notNull(),
+  body: text("body").notNull(),
+  mentions: uuid("mentions").array().notNull().default([]),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  editedAt: ts("edited_at"),
+  deletedAt: ts("deleted_at"),
+})
+
+export const taskActivity = pgTable("task_activity", {
+  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+  taskId: uuid("task_id").notNull(),
+  actorId: uuid("actor_id"),
+  action: text("action").notNull(),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+  createdAt: ts("created_at").notNull().defaultNow(),
+})
+
+export const taskAttachments = pgTable("task_attachments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id").notNull(),
+  uploaderId: uuid("uploader_id").notNull(),
+  objectKey: text("object_key").notNull(),
+  name: text("name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+  uploaded: boolean("uploaded").notNull().default(false),
+  createdAt: ts("created_at").notNull().defaultNow(),
+})
+
+export const taskSavedViews = pgTable("task_saved_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull(),
+  listId: uuid("list_id").notNull(),
+  name: text("name").notNull(),
+  view: text("view").$type<"list" | "board" | "calendar" | "timeline">().notNull(),
+  filters: jsonb("filters").$type<TaskFilters>().notNull().default({}),
+  createdAt: ts("created_at").notNull().defaultNow(),
+})
+
+export type TaskFilters = {
+  assignee?: "me" | string
+  priority?: TaskPriority[]
+  labelId?: string
+  status?: TaskStatusKind
+  q?: string
+}

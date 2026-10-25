@@ -60,6 +60,16 @@ What Cloqui protects, how, and what it does **not** claim. Keep this honest. If 
 - **Realtime:** message events are Postgres changes filtered by RLS for each subscriber, and the client refetches through server actions. Typing and presence use private realtime topics (`chat:<id>`) authorized by policies on `realtime.messages`.
 - **Not end-to-end encrypted.** Messages are stored on the server so they can be searched.
 
+## Tasks
+
+- **One read rule:** `public.can_read_space()`. Lists, tasks, comments, checklists, labels, attachments and activity all inherit their space's access. Open spaces are visible to full workspace members; private spaces only to their members. Guests see nothing unless added to a space.
+- **Assignees and mentions** are limited to people who can see the task, enforced by RLS on `task_assignees` and in the service. Nobody gets notified about a task they can't open.
+- **Database integrity:** a status must belong to the task's list, and subtasks stay one level deep in their parent's list.
+- **Descriptions** are Tiptap JSON, never HTML, so no markup can be injected.
+- **Cross-links respect both sides.** Turning a message into a task requires reading the message. A task's video link only shows to people who can watch the video.
+- **Saved views** are private to their owner.
+- **Reminders** run through `POST /api/cron/reminders`, guarded by `CRON_SECRET` (compared in constant time). The endpoint returns 404 when no secret is set.
+
 ## Content Security Policy
 
 Set in `next.config.ts`. It blocks other origins for scripts, frames, plugins and form posts, and forbids framing Cloqui (`frame-ancestors 'none'`).

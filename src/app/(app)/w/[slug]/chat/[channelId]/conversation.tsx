@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
   Download,
+  ListTodo,
   FileText,
   Lock,
   MessageSquareReply,
@@ -21,6 +22,7 @@ import {
   X,
 } from "lucide-react"
 import { toast } from "sonner"
+import { MakeTaskDialog } from "@/components/tasks/make-task-dialog"
 import { initials } from "@/components/app/initials"
 import {
   AlertDialog,
@@ -247,7 +249,13 @@ export function Conversation({
               No messages yet. Say hello.
             </p>
           ) : (
-            <MessageList messages={messages} me={me} members={members} onThread={openThread} />
+            <MessageList
+              messages={messages}
+              me={me}
+              members={members}
+              slug={slug}
+              onThread={openThread}
+            />
           )}
         </div>
         <p aria-live="polite" className="h-5 px-4 text-footnote text-fg-muted">
@@ -313,12 +321,14 @@ function MessageList({
   messages,
   me,
   members,
+  slug,
   onThread,
   inThread = false,
 }: {
   messages: ChatMessage[]
   me: { id: string; name: string }
   members: Member[]
+  slug: string
   onThread?: (id: string) => void
   inThread?: boolean
 }) {
@@ -345,7 +355,14 @@ function MessageList({
                 <span className="h-px flex-1 bg-border" />
               </div>
             )}
-            <MessageItem m={m} me={me} members={members} grouped={grouped} onThread={onThread} />
+            <MessageItem
+              m={m}
+              me={me}
+              members={members}
+              slug={slug}
+              grouped={grouped}
+              onThread={onThread}
+            />
           </li>
         )
       })}
@@ -381,16 +398,19 @@ function MessageItem({
   m,
   me,
   members,
+  slug,
   grouped,
   onThread,
 }: {
   m: ChatMessage
   me: { id: string; name: string }
   members: Member[]
+  slug: string
   grouped: boolean
   onThread?: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
+  const [makeTask, setMakeTask] = useState(false)
   const [draft, setDraft] = useState(m.body)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [, start] = useTransition()
@@ -604,6 +624,10 @@ function MessageItem({
                 )}
                 {m.pinned ? "Unpin" : "Pin to channel"}
               </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setMakeTask(true)}>
+                <ListTodo aria-hidden className="size-4" />
+                Make a task
+              </DropdownMenuItem>
               {mine && (
                 <>
                   <DropdownMenuItem onSelect={() => setEditing(true)}>
@@ -622,6 +646,12 @@ function MessageItem({
         </div>
       )}
 
+      <MakeTaskDialog
+        open={makeTask}
+        onOpenChange={setMakeTask}
+        slug={slug}
+        source={{ kind: "message", id: m.id }}
+      />
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1061,6 +1091,7 @@ function ThreadPanel({
   version,
   onClose,
   onTyping,
+  slug,
 }: {
   channelId: string
   parentId: string
@@ -1120,13 +1151,19 @@ function ThreadPanel({
           </p>
         ) : (
           <>
-            <MessageList messages={items.slice(0, 1)} me={me} members={members} inThread />
+            <MessageList
+              messages={items.slice(0, 1)}
+              me={me}
+              members={members}
+              slug={slug}
+              inThread
+            />
             <p className="my-3 flex items-center gap-3 text-footnote text-fg-muted">
               <span className="h-px flex-1 bg-border" />
               {items.length - 1} {items.length - 1 === 1 ? "reply" : "replies"}
               <span className="h-px flex-1 bg-border" />
             </p>
-            <MessageList messages={items.slice(1)} me={me} members={members} inThread />
+            <MessageList messages={items.slice(1)} me={me} members={members} slug={slug} inThread />
           </>
         )}
       </div>

@@ -199,7 +199,7 @@ async function VideoBody({ params }: { params: PageProps<"/v/[id]">["params"] })
               {sharePanel}
             </section>
 
-            {(canEdit || !(video.viewOnly && role === "viewer")) && (
+            {(canEdit || workspace.isMember || !(video.viewOnly && role === "viewer")) && (
               <section aria-label="Video actions">
                 <VideoTools
                   videoId={id}
@@ -208,6 +208,7 @@ async function VideoBody({ params }: { params: PageProps<"/v/[id]">["params"] })
                   isOwner={isOwner}
                   canDownload={!(video.viewOnly && role === "viewer")}
                   title={video.title}
+                  inWorkspace={workspace.isMember}
                 />
               </section>
             )}

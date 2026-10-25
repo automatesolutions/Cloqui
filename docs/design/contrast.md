@@ -8,7 +8,8 @@ WCAG 2.2 ratios for every Cloqui colour pair. Text needs 4.5:1 (3:1 for 18 px+ o
 | Dark  | text on raised `#1C2538`                  | 13.03 | AA text |
 | Dark  | text-secondary `#9AA7BD` on bg            | 7.58  | AA text |
 | Dark  | text-secondary on raised                  | 6.30  | AA text |
-| Dark  | text-muted `#7A869C` on surface `#151C2B` | 4.64  | AA text |
+| Dark  | text-muted `#8290A6` on surface `#151C2B` | 5.26  | AA text |
+| Dark  | text-muted `#8290A6` on raised `#1C2538`  | 4.73  | AA text |
 | Dark  | accent `#2DD4A8` on bg                    | 9.74  | AA text |
 | Dark  | on-accent `#04241B` on accent             | 8.71  | AA text |
 | Dark  | on-accent on accent-hover `#5CE0BD`       | 10.09 | AA text |

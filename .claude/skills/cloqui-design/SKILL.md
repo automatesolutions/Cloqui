@@ -18,25 +18,25 @@ Dark is the default theme. Light follows the system setting, and people can swit
 
 ### Dark (default)
 
-| Token            | Hex              | Use                                                                 |
-| ---------------- | ---------------- | ------------------------------------------------------------------- |
-| `bg`             | `#0E1420`        | App background (ink)                                                |
-| `surface`        | `#151C2B`        | Cards, sidebar, panels                                              |
-| `raised`         | `#1C2538`        | Popovers, menus, hovered rows, dialogs                              |
-| `border`         | `#26314A`        | Dividers and card edges (decorative only)                           |
-| `border-strong`  | `#3A4866`        | Selected cards, table headers                                       |
-| `input-border`   | `#5B6B8E`        | Inputs, checkboxes, toggles (3.19:1 on surface)                     |
-| `text`           | `#E8EDF5`        | Primary text (15.7:1 on bg)                                         |
-| `text-secondary` | `#9AA7BD`        | Secondary text (7.6:1 on bg)                                        |
-| `text-muted`     | `#7A869C`        | Timestamps, hints (4.6:1 on surface; never for body text)           |
-| `accent`         | `#2DD4A8`        | Primary buttons, focus ring, "secure/active" states (9.7:1 on bg)   |
-| `accent-hover`   | `#5CE0BD`        | Primary button hover                                                |
-| `on-accent`      | `#04241B`        | Text and icons on accent (8.7:1)                                    |
-| `accent-soft`    | `#2DD4A8` at 12% | Selected nav item, private badge fill                               |
-| `attention`      | `#F2B54A`        | Needs attention: expiring, pending request (10.1:1 on bg)           |
-| `attention-soft` | `#F2B54A` at 12% | Attention banner fill                                               |
-| `danger`         | `#F27C7C`        | Destructive actions only, plus the live/recording dot (7.0:1 on bg) |
-| `danger-soft`    | `#F27C7C` at 12% | Destructive confirm fill                                            |
+| Token            | Hex              | Use                                                                    |
+| ---------------- | ---------------- | ---------------------------------------------------------------------- |
+| `bg`             | `#0E1420`        | App background (ink)                                                   |
+| `surface`        | `#151C2B`        | Cards, sidebar, panels                                                 |
+| `raised`         | `#1C2538`        | Popovers, menus, hovered rows, dialogs                                 |
+| `border`         | `#26314A`        | Dividers and card edges (decorative only)                              |
+| `border-strong`  | `#3A4866`        | Selected cards, table headers                                          |
+| `input-border`   | `#5B6B8E`        | Inputs, checkboxes, toggles (3.19:1 on surface)                        |
+| `text`           | `#E8EDF5`        | Primary text (15.7:1 on bg)                                            |
+| `text-secondary` | `#9AA7BD`        | Secondary text (7.6:1 on bg)                                           |
+| `text-muted`     | `#8290A6`        | Timestamps, hints (4.7:1 on raised, 5.3:1 on surface; never body text) |
+| `accent`         | `#2DD4A8`        | Primary buttons, focus ring, "secure/active" states (9.7:1 on bg)      |
+| `accent-hover`   | `#5CE0BD`        | Primary button hover                                                   |
+| `on-accent`      | `#04241B`        | Text and icons on accent (8.7:1)                                       |
+| `accent-soft`    | `#2DD4A8` at 12% | Selected nav item, private badge fill                                  |
+| `attention`      | `#F2B54A`        | Needs attention: expiring, pending request (10.1:1 on bg)              |
+| `attention-soft` | `#F2B54A` at 12% | Attention banner fill                                                  |
+| `danger`         | `#F27C7C`        | Destructive actions only, plus the live/recording dot (7.0:1 on bg)    |
+| `danger-soft`    | `#F27C7C` at 12% | Destructive confirm fill                                               |
 
 ### Light
 
@@ -200,6 +200,7 @@ Loading (skeletons in `raised` with no shimmer, a 150 ms fade-in after 300 ms so
 
 ## 11. Changelog
 
+- 2026-10-26 · v1.0.2: dark `text-muted` #7A869C → #8290A6. axe caught 4.17:1 on raised surfaces (drawers, menus).
 - 2026-10-25 · v1.0.1: light `text-muted` #6B7689 → #626D80. axe caught 4.28:1 on the light page background.
 - 2026-10-25 · v1.0 approved as drafted.
 - 2026-10-25 · v0.1 draft. Palette tuned from the brief: input borders raised to meet 3:1, light accent darkened to `#0B7A60` for 5.3:1.

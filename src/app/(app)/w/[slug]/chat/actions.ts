@@ -44,11 +44,9 @@ const channelName = z
   .toLowerCase()
   .transform((s) => s.replace(/^#/, "").replace(/\s+/g, "-"))
   .pipe(
-    z
-      .string()
-      .regex(/^[a-z0-9][a-z0-9_-]{0,79}$/, {
-        error: "Use lowercase letters, numbers, dashes or underscores.",
-      })
+    z.string().regex(/^[a-z0-9][a-z0-9_-]{0,79}$/, {
+      error: "Use lowercase letters, numbers, dashes or underscores.",
+    })
   )
 
 export async function createChannelAction(

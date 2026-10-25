@@ -9,6 +9,7 @@ export const limits = {
   upload: { capacity: 50, perHour: 50 },
   // Bursts of 30, then one message every 3 seconds on average.
   chatMessage: { capacity: 30, perHour: 1200 },
+  taskWrite: { capacity: 60, perHour: 1200 },
   // 5 tries, then one more every 5 minutes.
   passcode: { capacity: 5, perHour: 12 },
   // One "viewed" audit event per person per video every 30 minutes.

@@ -67,6 +67,15 @@ Cloud Run Job: "media" (ffmpeg: WebM → MP4, thumbnails; transcription behind a
 - **Host controls** go through LiveKit's server API: remove participant, mute published microphone tracks, delete room. Lock and end are stored in Postgres too, so they hold for future joins.
 - **Live now:** connected clients send a heartbeat every minute. A room counts as live if someone sent one in the last 2 minutes.
 
+## Tasks
+
+- **Structure:** Workspace › Space › List › Task › Subtask. Access lives on the space (`can_read_space`), and everything below inherits it.
+- **Statuses:** each list gets four by default ("To do", "In progress", "In review", "Done"), each with a kind (`todo`, `in_progress`, `done`). A trigger keeps `completed_at` in step with the kind.
+- **Views:** list, board (dnd-kit, plus a "Move to" menu), calendar (a month table) and timeline (a 5-week CSS grid). Filters live in the URL. Saved views store a view plus filters per person.
+- **The task drawer** opens from `?task=<id>` on any task screen and loads through a server action.
+- **Realtime:** the list page listens for Postgres changes on `tasks` for that list and refreshes.
+- **Reminders:** Cloud Scheduler calls `POST /api/cron/reminders` every 15 minutes. It sends due-soon (today or tomorrow) and overdue notices once per task, using UTC dates for now.
+
 ## Next.js 16 notes
 
 - `cacheComponents` and `partialPrefetching` are on. Anything that reads the session (cookies) renders inside a `<Suspense>` boundary. Cached functions take a user id, never a raw session or email (cache keys are stored in plain text).

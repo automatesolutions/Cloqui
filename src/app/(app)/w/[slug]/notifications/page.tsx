@@ -1,6 +1,14 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { AtSign, Bell, MessageSquare, MessageSquareReply } from "lucide-react"
+import {
+  AlarmClock,
+  AtSign,
+  Bell,
+  CircleUserRound,
+  MessageSquare,
+  MessageSquareReply,
+  TriangleAlert,
+} from "lucide-react"
 import { EmptyState } from "@/components/app/empty-state"
 import { PageHeader } from "@/components/app/page-header"
 import { Button } from "@/components/ui/button"
@@ -18,6 +26,10 @@ const kinds: Record<string, { icon: typeof Bell; text: (actor: string) => string
   mention: { icon: AtSign, text: (a) => `${a} mentioned you` },
   dm: { icon: MessageSquare, text: (a) => `${a} sent you a message` },
   reply: { icon: MessageSquareReply, text: (a) => `${a} replied in a thread` },
+  task_assigned: { icon: CircleUserRound, text: (a) => `${a} assigned you a task` },
+  task_mention: { icon: AtSign, text: (a) => `${a} mentioned you on a task` },
+  task_due_soon: { icon: AlarmClock, text: () => "A task assigned to you is due soon" },
+  task_overdue: { icon: TriangleAlert, text: () => "A task assigned to you is overdue" },
 }
 
 function hrefFor(n: Item) {
@@ -37,7 +49,7 @@ export default async function NotificationsPage({ params }: PageProps<"/w/[slug]
     <>
       <PageHeader
         title="Notifications"
-        description="Mentions, direct messages and replies. Only you can see these."
+        description="Mentions, messages, replies and tasks. Only you can see these."
         actions={
           unread > 0 && (
             <form action={markAllReadAction.bind(null, slug)}>

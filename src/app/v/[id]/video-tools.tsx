@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Download, ImageIcon, Pencil, Trash2 } from "lucide-react"
+import { Download, ImageIcon, ListTodo, Pencil, Trash2 } from "lucide-react"
+import { MakeTaskDialog } from "@/components/tasks/make-task-dialog"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -137,6 +138,7 @@ export function VideoTools({
   isOwner,
   canDownload,
   title,
+  inWorkspace,
 }: {
   videoId: string
   slug: string
@@ -144,9 +146,12 @@ export function VideoTools({
   isOwner: boolean
   canDownload: boolean
   title: string
+  /** Guests have no task lists, so they don't get "Make a task". */
+  inWorkspace: boolean
 }) {
   const player = usePlayer()
   const [pending, start] = useTransition()
+  const [makeTask, setMakeTask] = useState(false)
 
   // The server cuts the frame from the private file, so no CORS on the bucket is needed.
   function useFrame() {
@@ -160,6 +165,20 @@ export function VideoTools({
 
   return (
     <div className="flex flex-wrap gap-2">
+      {inWorkspace && (
+        <>
+          <Button variant="secondary" onClick={() => setMakeTask(true)}>
+            <ListTodo aria-hidden />
+            Make a task
+          </Button>
+          <MakeTaskDialog
+            open={makeTask}
+            onOpenChange={setMakeTask}
+            slug={slug}
+            source={{ kind: "video", id: videoId }}
+          />
+        </>
+      )}
       {canEdit && (
         <Button variant="secondary" onClick={useFrame} loading={pending}>
           <ImageIcon aria-hidden />
