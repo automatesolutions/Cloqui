@@ -1,0 +1,231 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Tokens come from /cloqui-design (.claude/skills/cloqui-design/SKILL.md). Change them there first. */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  /* shadcn names, mapped to Cloqui tokens */
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--raised);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--on-accent);
+  --color-secondary: var(--surface);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--raised);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--raised);
+  --color-accent-foreground: var(--text);
+  --color-destructive: var(--danger);
+  --color-border: var(--border);
+  --color-input: var(--input-border);
+  --color-ring: var(--accent);
+
+  /* Cloqui names */
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--text);
+  --color-fg-secondary: var(--text-secondary);
+  --color-fg-muted: var(--text-muted);
+  --color-brand: var(--accent);
+  --color-brand-hover: var(--accent-hover);
+  --color-on-brand: var(--on-accent);
+  --color-brand-soft: var(--accent-soft);
+  --color-attention: var(--attention);
+  --color-attention-soft: var(--attention-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-sans: var(--font-switzer), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-heading: var(--font-cabinet), ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", Menlo, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+
+  --shadow-sm: var(--elev-sm);
+  --shadow-md: var(--elev-md);
+  --shadow-lg: var(--elev-lg);
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Type scale: text-display … text-caption */
+  --text-display: 3.5rem;
+  --text-display--line-height: 3.75rem;
+  --text-display--letter-spacing: -0.02em;
+  --text-title-1: 2.125rem;
+  --text-title-1--line-height: 2.5rem;
+  --text-title-1--letter-spacing: -0.015em;
+  --text-title-2: 1.75rem;
+  --text-title-2--line-height: 2.125rem;
+  --text-title-2--letter-spacing: -0.01em;
+  --text-title-3: 1.375rem;
+  --text-title-3--line-height: 1.75rem;
+  --text-title-3--letter-spacing: -0.005em;
+  --text-headline: 1.0625rem;
+  --text-headline--line-height: 1.375rem;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-body-lg: 1.0625rem;
+  --text-body-lg--line-height: 1.625rem;
+  --text-callout: 0.9375rem;
+  --text-callout--line-height: 1.375rem;
+  --text-footnote: 0.8125rem;
+  --text-footnote--line-height: 1.125rem;
+  --text-footnote--letter-spacing: 0.005em;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-caption--letter-spacing: 0.01em;
+}
+
+/* Dark is the default theme */
+:root,
+.dark {
+  --bg: #0e1420;
+  --surface: #151c2b;
+  --raised: #1c2538;
+  --border: #26314a;
+  --border-strong: #3a4866;
+  --input-border: #5b6b8e;
+  --text: #e8edf5;
+  --text-secondary: #9aa7bd;
+  --text-muted: #7a869c;
+  --accent: #2dd4a8;
+  --accent-hover: #5ce0bd;
+  --on-accent: #04241b;
+  --accent-soft: rgb(45 212 168 / 0.12);
+  --attention: #f2b54a;
+  --attention-soft: rgb(242 181 74 / 0.12);
+  --danger: #f27c7c;
+  --danger-soft: rgb(242 124 124 / 0.12);
+  --scrim: rgb(14 20 32 / 0.72);
+  --elev-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --elev-md: 0 4px 16px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --elev-lg: 0 16px 48px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.05);
+  color-scheme: dark;
+}
+
+.light {
+  --bg: #f6f7fa;
+  --surface: #ffffff;
+  --raised: #ffffff;
+  --border: #dde2eb;
+  --border-strong: #c5ccd9;
+  --input-border: #838ea3;
+  --text: #131a28;
+  --text-secondary: #4f5b72;
+  --text-muted: #626d80;
+  --accent: #0b7a60;
+  --accent-hover: #09664f;
+  --on-accent: #ffffff;
+  --accent-soft: rgb(11 122 96 / 0.1);
+  --attention: #935400;
+  --attention-soft: rgb(147 84 0 / 0.1);
+  --danger: #c03538;
+  --danger-soft: rgb(192 53 56 / 0.1);
+  --scrim: rgb(19 26 40 / 0.4);
+  --elev-sm: 0 1px 2px rgb(19 26 40 / 0.06);
+  --elev-md: 0 4px 16px rgb(19 26 40 / 0.08), 0 1px 3px rgb(19 26 40 / 0.06);
+  --elev-lg: 0 16px 48px rgb(19 26 40 / 0.12);
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-body text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-heading;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--accent-soft);
+  }
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1120px;
+  padding-inline: max(16px, env(safe-area-inset-left));
+  @media (width >= 768px) {
+    padding-inline: 24px;
+  }
+  @media (width >= 1024px) {
+    padding-inline: 32px;
+  }
+}
+
+/* Recording and live dot: calm opacity fade, never scale */
+@keyframes cloqui-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@utility animate-calm-pulse {
+  animation: cloqui-pulse 2s ease-in-out infinite;
+}
+
+/* Hero reveal: hidden until GSAP runs; reveals on its own after 1.5 s if it never does */
+@keyframes cloqui-reveal-fallback {
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-hero-reveal] [data-reveal] {
+    opacity: 0;
+    visibility: hidden;
+    animation: cloqui-reveal-fallback 0s 1.5s forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
