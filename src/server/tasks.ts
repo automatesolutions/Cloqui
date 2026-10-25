@@ -93,19 +93,17 @@ async function notify(
 ) {
   const unique = [...new Set(recipients)].filter((id) => id !== actor.id)
   if (!unique.length) return
-  await systemDb
-    .insert(notifications)
-    .values(
-      unique.map((userId) => ({
-        userId,
-        workspaceId,
-        kind,
-        actorId: actor.id,
-        targetType: "task",
-        targetId: taskId,
-        preview: preview.slice(0, 140),
-      }))
-    )
+  await systemDb.insert(notifications).values(
+    unique.map((userId) => ({
+      userId,
+      workspaceId,
+      kind,
+      actorId: actor.id,
+      targetType: "task",
+      targetId: taskId,
+      preview: preview.slice(0, 140),
+    }))
+  )
 }
 
 /** Keep only people who can see this space. */
@@ -147,15 +145,13 @@ export async function createSpace(
   const id = crypto.randomUUID()
   try {
     await withRls(user.claims, async (tx) => {
-      await tx
-        .insert(taskSpaces)
-        .values({
-          id,
-          workspaceId: workspace.id,
-          name: input.name,
-          isPrivate: input.isPrivate,
-          createdBy: user.id,
-        })
+      await tx.insert(taskSpaces).values({
+        id,
+        workspaceId: workspace.id,
+        name: input.name,
+        isPrivate: input.isPrivate,
+        createdBy: user.id,
+      })
       await tx.insert(taskSpaceMembers).values({ spaceId: id, userId: user.id, role: "admin" })
       const others = [...new Set(input.memberIds)].filter((u) => u !== user.id)
       if (others.length)
@@ -177,16 +173,14 @@ export async function createList(
   const id = crypto.randomUUID()
   try {
     await withRls(user.claims, (tx) =>
-      tx
-        .insert(taskLists)
-        .values({
-          id,
-          spaceId,
-          name: input.name,
-          channelId: input.channelId ?? null,
-          createdBy: user.id,
-          position: Date.now(),
-        })
+      tx.insert(taskLists).values({
+        id,
+        spaceId,
+        name: input.name,
+        channelId: input.channelId ?? null,
+        createdBy: user.id,
+        position: Date.now(),
+      })
     )
   } catch (e) {
     if (pgCode(e) === "42501") throw new AccessDeniedError()
@@ -708,17 +702,15 @@ export async function createTaskAttachmentUpload(
   const type = file.mimeType.slice(0, 100) || "application/octet-stream"
   const name = file.name.replace(/[^\w.\- ]+/g, "_").slice(0, 200) || "file"
   await withRls(user.claims, (tx) =>
-    tx
-      .insert(taskAttachments)
-      .values({
-        id,
-        taskId,
-        uploaderId: user.id,
-        objectKey: key,
-        name,
-        mimeType: type,
-        sizeBytes: file.sizeBytes,
-      })
+    tx.insert(taskAttachments).values({
+      id,
+      taskId,
+      uploaderId: user.id,
+      objectKey: key,
+      name,
+      mimeType: type,
+      sizeBytes: file.sizeBytes,
+    })
   )
   return { attachmentId: id, uploadUrl: await presignUpload(key, type), contentType: type }
 }
@@ -985,18 +977,16 @@ export async function runReminders(now = new Date()) {
         .where(eq(taskAssignees.taskId, t.id))
     ).map((r) => r.id)
     if (people.length) {
-      await systemDb
-        .insert(notifications)
-        .values(
-          people.map((userId) => ({
-            userId,
-            workspaceId: t.workspaceId,
-            kind: overdue ? "task_overdue" : "task_due_soon",
-            targetType: "task",
-            targetId: t.id,
-            preview: t.title.slice(0, 140),
-          }))
-        )
+      await systemDb.insert(notifications).values(
+        people.map((userId) => ({
+          userId,
+          workspaceId: t.workspaceId,
+          kind: overdue ? "task_overdue" : "task_due_soon",
+          targetType: "task",
+          targetId: t.id,
+          preview: t.title.slice(0, 140),
+        }))
+      )
       sent += people.length
     }
     await systemDb

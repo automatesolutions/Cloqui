@@ -37,7 +37,11 @@ export function TwoFactorSection({ enabled }: { enabled: boolean }) {
           <ShieldCheck aria-hidden className="size-5 text-brand-ink" strokeWidth={1.75} />
           On. You&apos;ll enter a code from your authenticator app when you sign in.
         </p>
-        <Button variant="secondary" className="justify-self-start" onClick={() => setTurningOff(true)}>
+        <Button
+          variant="secondary"
+          className="justify-self-start"
+          onClick={() => setTurningOff(true)}
+        >
           Turn off
         </Button>
       </div>
@@ -60,13 +64,23 @@ export function TwoFactorSection({ enabled }: { enabled: boolean }) {
         }}
       >
         <FormMessage message={error} />
-        <Field name="off-code" label="Enter a current code to turn it off" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+        <Field
+          name="off-code"
+          label="Enter a current code to turn it off"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+        />
         <div className="flex gap-2">
           <Button type="submit" variant="danger" loading={pending} disabled={code.length !== 6}>
             <ShieldOff aria-hidden />
             Turn off
           </Button>
-          <Button type="button" variant="ghost" onClick={() => setTurningOff(false)}>Keep it on</Button>
+          <Button type="button" variant="ghost" onClick={() => setTurningOff(false)}>
+            Keep it on
+          </Button>
         </div>
       </form>
     )
@@ -76,7 +90,8 @@ export function TwoFactorSection({ enabled }: { enabled: boolean }) {
     return (
       <div className="grid gap-3">
         <p className="text-callout text-fg-secondary">
-          Off. Add a second step with an authenticator app like 1Password, Google Authenticator or Microsoft Authenticator.
+          Off. Add a second step with an authenticator app like 1Password, Google Authenticator or
+          Microsoft Authenticator.
         </p>
         <FormMessage message={error} />
         <Button
@@ -118,18 +133,40 @@ export function TwoFactorSection({ enabled }: { enabled: boolean }) {
       <div className="flex flex-wrap items-start gap-6">
         {/* The QR is an SVG data URL from Supabase; a white tile keeps it scannable in dark mode. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={setup.qr} alt="QR code for your authenticator app" width={176} height={176} className="rounded-md bg-white p-2" />
+        <img
+          src={setup.qr}
+          alt="QR code for your authenticator app"
+          width={176}
+          height={176}
+          className="rounded-md bg-white p-2"
+        />
         <div className="grid max-w-xs gap-1.5">
-          <p className="text-footnote text-fg-secondary">Can&apos;t scan it? Enter this key instead:</p>
-          <code className="rounded-sm bg-raised px-2 py-1.5 font-mono text-footnote break-all select-all">{setup.secret}</code>
+          <p className="text-footnote text-fg-secondary">
+            Can&apos;t scan it? Enter this key instead:
+          </p>
+          <code className="rounded-sm bg-raised px-2 py-1.5 font-mono text-footnote break-all select-all">
+            {setup.secret}
+          </code>
         </div>
       </div>
       <FormMessage message={error} />
       <div className="grid max-w-sm gap-3">
-        <Field name="setup-code" label="6-digit code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+        <Field
+          name="setup-code"
+          label="6-digit code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+        />
         <div className="flex gap-2">
-          <Button type="submit" loading={pending} disabled={code.length !== 6}>Turn on</Button>
-          <Button type="button" variant="ghost" onClick={() => setSetup(null)}>Cancel</Button>
+          <Button type="submit" loading={pending} disabled={code.length !== 6}>
+            Turn on
+          </Button>
+          <Button type="button" variant="ghost" onClick={() => setSetup(null)}>
+            Cancel
+          </Button>
         </div>
       </div>
     </form>
@@ -143,19 +180,30 @@ export function DeleteAccountSection({ email }: { email: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="justify-self-start">Delete my account</Button>
+        <Button variant="destructive" className="justify-self-start">
+          Delete my account
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete your account?</AlertDialogTitle>
           <AlertDialogDescription>
-            Your videos, messages, comments and tasks you created are deleted. Workspaces where you&apos;re the only person are deleted too. This can&apos;t be undone.
+            Your videos, messages, comments and tasks you created are deleted. Workspaces where
+            you&apos;re the only person are deleted too. This can&apos;t be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <FormMessage message={error} />
-        <Field name="confirm-email" label={`Type ${email} to confirm`} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
+        <Field
+          name="confirm-email"
+          label={`Type ${email} to confirm`}
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          autoComplete="off"
+        />
         <AlertDialogFooter>
-          <AlertDialogCancel asChild><Button variant="secondary">Keep my account</Button></AlertDialogCancel>
+          <AlertDialogCancel asChild>
+            <Button variant="secondary">Keep my account</Button>
+          </AlertDialogCancel>
           <Button
             variant="danger"
             loading={pending}

@@ -45,13 +45,13 @@ We don't use advertising or tracking cookies. We use cookies only to keep you si
 
 We use these providers to run Cloqui. Each only processes data to provide their service to us.
 
-| Provider | What for | Where |
-| --- | --- | --- |
-| Supabase | Database, sign-in, realtime | [region] |
-| Google Cloud | Runs the app | [region] |
-| Cloudflare R2 | Stores videos and files | [region] |
-| LiveKit | Live rooms and huddles | [region] |
-| Resend | Sends email | [region] |
+| Provider      | What for                    | Where    |
+| ------------- | --------------------------- | -------- |
+| Supabase      | Database, sign-in, realtime | [region] |
+| Google Cloud  | Runs the app                | [region] |
+| Cloudflare R2 | Stores videos and files     | [region] |
+| LiveKit       | Live rooms and huddles      | [region] |
+| Resend        | Sends email                 | [region] |
 
 We share data with authorities only when the law requires it, and we'll tell you unless we're
 legally not allowed to.

@@ -48,7 +48,11 @@ export function validateTweak(v: TweakValues): string | null {
   for (const k of TWEAK_COLORS) {
     if (!isHex(v.colors[k] ?? "")) return `--${k} must be a hex colour like #0b7a60`
   }
-  if (!Number.isInteger(v.radiusMd) || v.radiusMd < RADIUS_RANGE.min || v.radiusMd > RADIUS_RANGE.max) {
+  if (
+    !Number.isInteger(v.radiusMd) ||
+    v.radiusMd < RADIUS_RANGE.min ||
+    v.radiusMd > RADIUS_RANGE.max
+  ) {
     return `Corner radius must be a whole number from ${RADIUS_RANGE.min} to ${RADIUS_RANGE.max}`
   }
   const failed = contrastFailures(v.colors)
@@ -87,8 +91,14 @@ export function bakeTokens(css: string, theme: TweakTheme, v: TweakValues): stri
     body = body.replace(new RegExp(`(\\n\\s*--${k}:\\s*)[^;]+;`), `$1${v.colors[k].toLowerCase()};`)
   }
   // The soft tint follows the accent, keeping its own opacity.
-  body = body.replace(/(\n\s*--accent-soft:\s*)rgb\([^/]+\/\s*([\d.]+)\);/, `$1rgb(${hexToRgb(v.colors.accent)} / $2);`)
-  let out = css.replace(blockPattern[theme], (_, open: string, __: string, close: string) => open + body + close)
+  body = body.replace(
+    /(\n\s*--accent-soft:\s*)rgb\([^/]+\/\s*([\d.]+)\);/,
+    `$1rgb(${hexToRgb(v.colors.accent)} / $2);`
+  )
+  let out = css.replace(
+    blockPattern[theme],
+    (_, open: string, __: string, close: string) => open + body + close
+  )
 
   const r = radiusScale(v.radiusMd)
   for (const [size, px] of Object.entries(r)) {

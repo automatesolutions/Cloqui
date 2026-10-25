@@ -2,7 +2,17 @@
 
 import Link from "next/link"
 import { useTheme } from "next-themes"
-import { Check, ChevronsUpDown, LogOut, Monitor, Moon, Plus, ShieldCheck, ShieldOff, Sun } from "lucide-react"
+import {
+  Check,
+  ChevronsUpDown,
+  LogOut,
+  Monitor,
+  Moon,
+  Plus,
+  ShieldCheck,
+  ShieldOff,
+  Sun,
+} from "lucide-react"
 import { signOutAction, signOutEverywhereAction } from "@/app/(auth)/actions"
 import {
   DropdownMenu,

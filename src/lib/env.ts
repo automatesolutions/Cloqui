@@ -33,4 +33,6 @@ const building = process.env.NEXT_PHASE === "phase-production-build"
 
 const present = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== ""))
 
-export const env = (building ? schema.partial().parse(present) : schema.parse(process.env)) as z.infer<typeof schema>
+export const env = (
+  building ? schema.partial().parse(present) : schema.parse(process.env)
+) as z.infer<typeof schema>

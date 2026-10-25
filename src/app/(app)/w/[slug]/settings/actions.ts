@@ -144,7 +144,12 @@ export async function setRequireTwoFactorAction(slug: string, on: boolean): Prom
 // Empty means "keep forever". Otherwise a whole number of days, 7 to 3650.
 const retentionDays = z.preprocess(
   (v) => (v === "" || v === "forever" || v == null ? null : Number(v)),
-  z.number().int().min(7, { error: "Keep things at least 7 days." }).max(3650, { error: "10 years is the most." }).nullable()
+  z
+    .number()
+    .int()
+    .min(7, { error: "Keep things at least 7 days." })
+    .max(3650, { error: "10 years is the most." })
+    .nullable()
 )
 
 export async function setRetentionAction(

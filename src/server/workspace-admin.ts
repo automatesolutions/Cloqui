@@ -27,7 +27,10 @@ export type SecuritySettings = {
   membersWithoutTwoFactor: { id: string; name: string }[]
 }
 
-export async function getSecuritySettings(user: CurrentUser, slug: string): Promise<SecuritySettings> {
+export async function getSecuritySettings(
+  user: CurrentUser,
+  slug: string
+): Promise<SecuritySettings> {
   const { workspace } = await authorize(user, "workspace.update", slug)
   const [row] = await withRls(user.claims, (tx) =>
     tx
@@ -53,7 +56,9 @@ export async function setRequireTwoFactor(user: CurrentUser, slug: string, on: b
   const { workspace } = await authorize(user, "workspace.update", slug)
   // Otherwise the admin would lock themselves out with the click.
   if (on && user.aal !== "aal2") {
-    throw new UserFacingError("Turn on two-step sign-in for yourself first, in Account and security.")
+    throw new UserFacingError(
+      "Turn on two-step sign-in for yourself first, in Account and security."
+    )
   }
   await withRls(user.claims, async (tx) => {
     await tx.update(workspaces).set({ require2fa: on }).where(eq(workspaces.id, workspace.id))
@@ -103,22 +108,53 @@ export async function exportWorkspace(user: CurrentUser, slug: string) {
   const { workspace } = await authorize(user, "workspace.update", slug)
   return withRls(user.claims, async (tx) => {
     const members = await tx
-      .select({ id: workspaceMembers.userId, name: profiles.displayName, role: workspaceMembers.role })
+      .select({
+        id: workspaceMembers.userId,
+        name: profiles.displayName,
+        role: workspaceMembers.role,
+      })
       .from(workspaceMembers)
       .leftJoin(profiles, eq(profiles.id, workspaceMembers.userId))
       .where(eq(workspaceMembers.workspaceId, workspace.id))
     const channels = await tx
-      .select({ id: chatChannels.id, name: chatChannels.name, kind: chatChannels.kind, isPrivate: chatChannels.isPrivate })
+      .select({
+        id: chatChannels.id,
+        name: chatChannels.name,
+        kind: chatChannels.kind,
+        isPrivate: chatChannels.isPrivate,
+      })
       .from(chatChannels)
       .where(eq(chatChannels.workspaceId, workspace.id))
     const messages = channels.length
       ? await tx
-          .select({ id: chatMessages.id, channelId: chatMessages.channelId, authorId: chatMessages.authorId, parentId: chatMessages.parentId, body: chatMessages.body, createdAt: chatMessages.createdAt, editedAt: chatMessages.editedAt })
+          .select({
+            id: chatMessages.id,
+            channelId: chatMessages.channelId,
+            authorId: chatMessages.authorId,
+            parentId: chatMessages.parentId,
+            body: chatMessages.body,
+            createdAt: chatMessages.createdAt,
+            editedAt: chatMessages.editedAt,
+          })
           .from(chatMessages)
-          .where(and(inArray(chatMessages.channelId, channels.map((c) => c.id)), isNull(chatMessages.deletedAt)))
+          .where(
+            and(
+              inArray(
+                chatMessages.channelId,
+                channels.map((c) => c.id)
+              ),
+              isNull(chatMessages.deletedAt)
+            )
+          )
       : []
     const vids = await tx
-      .select({ id: videos.id, title: videos.title, ownerId: videos.ownerId, durationMs: videos.durationMs, createdAt: videos.createdAt })
+      .select({
+        id: videos.id,
+        title: videos.title,
+        ownerId: videos.ownerId,
+        durationMs: videos.durationMs,
+        createdAt: videos.createdAt,
+      })
       .from(videos)
       .where(and(eq(videos.workspaceId, workspace.id), isNull(videos.deletedAt)))
     const spaces = await tx
@@ -129,13 +165,32 @@ export async function exportWorkspace(user: CurrentUser, slug: string) {
       ? await tx
           .select({ id: taskLists.id, spaceId: taskLists.spaceId, name: taskLists.name })
           .from(taskLists)
-          .where(inArray(taskLists.spaceId, spaces.map((s) => s.id)))
+          .where(
+            inArray(
+              taskLists.spaceId,
+              spaces.map((s) => s.id)
+            )
+          )
       : []
     const taskRows = lists.length
       ? await tx
-          .select({ id: tasks.id, listId: tasks.listId, title: tasks.title, statusId: tasks.statusId, priority: tasks.priority, dueDate: tasks.dueDate, createdBy: tasks.createdBy, createdAt: tasks.createdAt })
+          .select({
+            id: tasks.id,
+            listId: tasks.listId,
+            title: tasks.title,
+            statusId: tasks.statusId,
+            priority: tasks.priority,
+            dueDate: tasks.dueDate,
+            createdBy: tasks.createdBy,
+            createdAt: tasks.createdAt,
+          })
           .from(tasks)
-          .where(inArray(tasks.listId, lists.map((l) => l.id)))
+          .where(
+            inArray(
+              tasks.listId,
+              lists.map((l) => l.id)
+            )
+          )
       : []
     await audit(tx, {
       workspaceId: workspace.id,
@@ -162,9 +217,15 @@ export async function exportWorkspace(user: CurrentUser, slug: string) {
 /** Deletes videos and messages older than each workspace's retention setting. Run daily. */
 export async function runRetention() {
   const due = await systemDb
-    .select({ id: workspaces.id, videoDays: workspaces.retentionVideoDays, messageDays: workspaces.retentionMessageDays })
+    .select({
+      id: workspaces.id,
+      videoDays: workspaces.retentionVideoDays,
+      messageDays: workspaces.retentionMessageDays,
+    })
     .from(workspaces)
-    .where(sql`${workspaces.retentionVideoDays} is not null or ${workspaces.retentionMessageDays} is not null`)
+    .where(
+      sql`${workspaces.retentionVideoDays} is not null or ${workspaces.retentionMessageDays} is not null`
+    )
   let videosDeleted = 0
   let messagesDeleted = 0
   for (const w of due) {
@@ -173,8 +234,15 @@ export async function runRetention() {
       const old = await systemDb
         .delete(videos)
         .where(and(eq(videos.workspaceId, w.id), lt(videos.createdAt, cutoff)))
-        .returning({ o: videos.originalKey, p: videos.playbackKey, t: videos.thumbnailKey, c: videos.captionsKey })
-      await deleteObjects(old.flatMap((v) => [v.o, v.p ?? "", v.t ?? "", v.c ?? ""]).filter(Boolean))
+        .returning({
+          o: videos.originalKey,
+          p: videos.playbackKey,
+          t: videos.thumbnailKey,
+          c: videos.captionsKey,
+        })
+      await deleteObjects(
+        old.flatMap((v) => [v.o, v.p ?? "", v.t ?? "", v.c ?? ""]).filter(Boolean)
+      )
       videosDeleted += old.length
     }
     if (w.messageDays) {

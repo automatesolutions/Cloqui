@@ -33,7 +33,9 @@ export type AutomationRow = {
 
 async function canReadList(user: CurrentUser, listId: string) {
   const [r] = await withRls(user.claims, (tx) =>
-    tx.execute<{ ok: boolean }>(sql`select public.can_read_space(public.list_space(${listId}::uuid)) as ok`)
+    tx.execute<{ ok: boolean }>(
+      sql`select public.can_read_space(public.list_space(${listId}::uuid)) as ok`
+    )
   )
   return r?.ok === true
 }
@@ -63,14 +65,26 @@ export async function listAutomations(user: CurrentUser, listId: string): Promis
     statusId: r.statusId,
     statusName: r.statusName,
     action: r.action,
-    targetName: r.action === "notify_user" ? r.userName : r.action === "post_channel" ? (r.channelName ? `#${r.channelName}` : "a private channel") : null,
+    targetName:
+      r.action === "notify_user"
+        ? r.userName
+        : r.action === "post_channel"
+          ? r.channelName
+            ? `#${r.channelName}`
+            : "a private channel"
+          : null,
   }))
 }
 
 export async function createAutomation(
   user: CurrentUser,
   listId: string,
-  input: { statusId: string; action: AutomationAction; targetUserId?: string; targetChannelId?: string }
+  input: {
+    statusId: string
+    action: AutomationAction
+    targetUserId?: string
+    targetChannelId?: string
+  }
 ) {
   if (!(await canReadList(user, listId))) throw new AccessDeniedError()
   if (!(await takeToken("taskWrite", user.id))) {
@@ -102,7 +116,10 @@ export async function createAutomation(
 
 export async function deleteAutomation(user: CurrentUser, automationId: string) {
   const res = await withRls(user.claims, (tx) =>
-    tx.delete(taskAutomations).where(eq(taskAutomations.id, automationId)).returning({ id: taskAutomations.id })
+    tx
+      .delete(taskAutomations)
+      .where(eq(taskAutomations.id, automationId))
+      .returning({ id: taskAutomations.id })
   )
   if (!res.length) throw new AccessDeniedError()
 }
@@ -123,7 +140,12 @@ export async function runAutomations(
       .where(and(eq(taskAutomations.listId, task.listId), eq(taskAutomations.statusId, statusId)))
     if (!rules.length) return
     const [ctx] = await systemDb
-      .select({ workspaceId: taskSpaces.workspaceId, slug: workspaces.slug, spaceId: taskSpaces.id, statusName: taskStatuses.name })
+      .select({
+        workspaceId: taskSpaces.workspaceId,
+        slug: workspaces.slug,
+        spaceId: taskSpaces.id,
+        statusName: taskStatuses.name,
+      })
       .from(taskLists)
       .innerJoin(taskSpaces, eq(taskSpaces.id, taskLists.spaceId))
       .innerJoin(workspaces, eq(workspaces.id, taskSpaces.workspaceId))
@@ -135,7 +157,10 @@ export async function runAutomations(
     for (const r of rules) {
       if (r.action === "notify_user" && r.targetUserId) recipients.add(r.targetUserId)
       if (r.action === "notify_assignees") {
-        const a = await systemDb.select({ id: taskAssignees.userId }).from(taskAssignees).where(eq(taskAssignees.taskId, task.id))
+        const a = await systemDb
+          .select({ id: taskAssignees.userId })
+          .from(taskAssignees)
+          .where(eq(taskAssignees.taskId, task.id))
         for (const x of a) recipients.add(x.id)
       }
     }
@@ -162,16 +187,19 @@ export async function runAutomations(
 
     // A channel can hold people who can't see this list, so the post never includes the title:
     // only a link, which opens for people who can see the task.
-    const channels = rules.filter((r) => r.action === "post_channel" && r.targetChannelId).map((r) => r.targetChannelId!)
+    const channels = rules
+      .filter((r) => r.action === "post_channel" && r.targetChannelId)
+      .map((r) => r.targetChannelId!)
     const link = `${env.NEXT_PUBLIC_APP_URL}/w/${ctx.slug}/tasks/${task.listId}?task=${task.id}`
     for (const channelId of new Set(channels)) {
-      await postMessage(actor, channelId, { body: `Moved a task to ${ctx.statusName}: ${link}` }).catch(() => {})
+      await postMessage(actor, channelId, {
+        body: `Moved a task to ${ctx.statusName}: ${link}`,
+      }).catch(() => {})
     }
   } catch (e) {
     console.error("automation failed", (e as Error)?.name)
   }
 }
-
 
 /** Channels this person can post a task link to: ones they can read in the list's workspace. */
 export async function listPostableChannels(user: CurrentUser, listId: string) {
@@ -185,7 +213,13 @@ export async function listPostableChannels(user: CurrentUser, listId: string) {
     tx
       .select({ id: chatChannels.id, name: chatChannels.name })
       .from(chatChannels)
-      .where(and(eq(chatChannels.workspaceId, ctx.workspaceId), eq(chatChannels.kind, "channel"), sql`${chatChannels.archivedAt} is null`))
+      .where(
+        and(
+          eq(chatChannels.workspaceId, ctx.workspaceId),
+          eq(chatChannels.kind, "channel"),
+          sql`${chatChannels.archivedAt} is null`
+        )
+      )
       .orderBy(chatChannels.name)
   )
 }

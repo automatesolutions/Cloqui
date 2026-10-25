@@ -307,7 +307,8 @@ const automationInput = z.discriminatedUnion("action", [
 
 export async function createAutomationAction(slug: string, listId: string, input: unknown) {
   return run(
-    async () => createAutomation(await requireUser(), id.parse(listId), automationInput.parse(input)),
+    async () =>
+      createAutomation(await requireUser(), id.parse(listId), automationInput.parse(input)),
     `/w/${slug}/tasks/${listId}`
   )
 }

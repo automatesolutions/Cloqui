@@ -3,10 +3,7 @@
 import { useState, useTransition } from "react"
 import { Trash2, Zap } from "lucide-react"
 import { toast } from "sonner"
-import {
-  createAutomationAction,
-  deleteAutomationAction,
-} from "@/app/(app)/w/[slug]/tasks/actions"
+import { createAutomationAction, deleteAutomationAction } from "@/app/(app)/w/[slug]/tasks/actions"
 import { FormMessage } from "@/components/forms/field"
 import { Button } from "@/components/ui/button"
 import {
@@ -76,8 +73,8 @@ export function AutomationsDialog({
         <DialogHeader>
           <DialogTitle>Automations</DialogTitle>
           <DialogDescription>
-            When a task in this list moves to a status, Cloqui does one thing for you. Only people who
-            can see this list get notified.
+            When a task in this list moves to a status, Cloqui does one thing for you. Only people
+            who can see this list get notified.
           </DialogDescription>
         </DialogHeader>
 
@@ -86,7 +83,8 @@ export function AutomationsDialog({
             {automations.map((a) => (
               <li key={a.id} className="flex min-h-11 items-center gap-2 rounded-md bg-raised px-3">
                 <span className="min-w-0 flex-1 text-callout">
-                  When moved to <strong className="font-semibold">{a.statusName}</strong>, {describe(a)}
+                  When moved to <strong className="font-semibold">{a.statusName}</strong>,{" "}
+                  {describe(a)}
                 </span>
                 <Button
                   size="icon"
@@ -136,20 +134,30 @@ export function AutomationsDialog({
               </SelectTrigger>
               <SelectContent>
                 {statuses.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="auto-action">Do this</Label>
-            <Select value={action} onValueChange={(v) => { setAction(v as AutomationAction); setTarget("") }}>
+            <Select
+              value={action}
+              onValueChange={(v) => {
+                setAction(v as AutomationAction)
+                setTarget("")
+              }}
+            >
               <SelectTrigger id="auto-action" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {(Object.keys(actionLabels) as AutomationAction[]).map((k) => (
-                  <SelectItem key={k} value={k}>{actionLabels[k]}</SelectItem>
+                  <SelectItem key={k} value={k}>
+                    {actionLabels[k]}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -160,7 +168,11 @@ export function AutomationsDialog({
               {options.length ? (
                 <Select value={target} onValueChange={setTarget}>
                   <SelectTrigger id="auto-target" className="w-full">
-                    <SelectValue placeholder={action === "notify_user" ? "Choose a person" : "Choose a channel"} />
+                    <SelectValue
+                      placeholder={
+                        action === "notify_user" ? "Choose a person" : "Choose a channel"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {options.map((o) => (
@@ -172,17 +184,25 @@ export function AutomationsDialog({
                 </Select>
               ) : (
                 <p className="text-callout text-fg-secondary">
-                  {action === "notify_user" ? "Nobody else can see this list yet." : "You aren't in any channels yet."}
+                  {action === "notify_user"
+                    ? "Nobody else can see this list yet."
+                    : "You aren't in any channels yet."}
                 </p>
               )}
               {action === "post_channel" && (
                 <p className="text-footnote text-fg-secondary">
-                  The post has a link, not the task&apos;s title, so people in the channel who can&apos;t see this list learn nothing about it.
+                  The post has a link, not the task&apos;s title, so people in the channel who
+                  can&apos;t see this list learn nothing about it.
                 </p>
               )}
             </div>
           )}
-          <Button type="submit" className="justify-self-start" loading={pending} disabled={!statusId || (needsTarget && !target)}>
+          <Button
+            type="submit"
+            className="justify-self-start"
+            loading={pending}
+            disabled={!statusId || (needsTarget && !target)}
+          >
             Add automation
           </Button>
         </form>

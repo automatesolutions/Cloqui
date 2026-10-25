@@ -47,7 +47,9 @@ export function RequireTwoFactorToggle({
               if (!r.ok) return setError(r.message)
               setError(undefined)
               setOn(next)
-              toast.success(next ? "Two-step sign-in is now required." : "Two-step sign-in is now optional.")
+              toast.success(
+                next ? "Two-step sign-in is now required." : "Two-step sign-in is now optional."
+              )
             })
           }
         />
@@ -55,7 +57,9 @@ export function RequireTwoFactorToggle({
       <FormMessage message={error} />
       {missing.length > 0 ? (
         <p className="text-footnote text-fg-secondary">
-          {on ? "Can't open the workspace until they set it up: " : "Not set up yet, so they'd lose access until they do: "}
+          {on
+            ? "Can't open the workspace until they set it up: "
+            : "Not set up yet, so they'd lose access until they do: "}
           {missing.map((m) => m.name).join(", ")}.
         </p>
       ) : (
@@ -116,19 +120,30 @@ export function DeleteWorkspaceButton({ slug, name }: { slug: string; name: stri
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="justify-self-start">Delete workspace</Button>
+        <Button variant="destructive" className="justify-self-start">
+          Delete workspace
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {name}?</AlertDialogTitle>
           <AlertDialogDescription>
-            Every video, message, task and file in it is deleted for everyone. This can&apos;t be undone.
+            Every video, message, task and file in it is deleted for everyone. This can&apos;t be
+            undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <FormMessage message={error} />
-        <Field name="confirm-name" label={`Type ${name} to confirm`} value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" />
+        <Field
+          name="confirm-name"
+          label={`Type ${name} to confirm`}
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          autoComplete="off"
+        />
         <AlertDialogFooter>
-          <AlertDialogCancel asChild><Button variant="secondary">Keep it</Button></AlertDialogCancel>
+          <AlertDialogCancel asChild>
+            <Button variant="secondary">Keep it</Button>
+          </AlertDialogCancel>
           <Button
             variant="danger"
             loading={pending}

@@ -75,6 +75,14 @@ Cloud Run Job: "media" (ffmpeg: WebM → MP4, thumbnails; transcription behind a
 - **The task drawer** opens from `?task=<id>` on any task screen and loads through a server action.
 - **Realtime:** the list page listens for Postgres changes on `tasks` for that list and refreshes.
 - **Reminders:** Cloud Scheduler calls `POST /api/cron/reminders` every 15 minutes. It sends due-soon (today or tomorrow) and overdue notices once per task, using UTC dates for now.
+- **Automations** (`src/server/automations.ts`): "when a task moves to <status>", notify the assignees, notify a person, or post a link in a channel. They run after `updateTask` and `moveTask` change a status, best effort: a failed automation never blocks the move.
+
+## Admin and account
+
+- **Two-step sign-in:** Supabase MFA (TOTP). `readSession()` reads the assurance level; `aal` goes into the RLS claims so `workspace_2fa_ok()` can enforce a workspace's requirement inside Postgres.
+- **Account page** (`/account`): name, two-step sign-in, sessions, sign out everywhere, export, delete.
+- **Workspace Security tab** (admins): require two-step sign-in, retention, export; delete for the owner. Logic in `src/server/workspace-admin.ts`.
+- **Retention:** `POST /api/cron/retention`, daily.
 
 ## Next.js 16 notes
 
@@ -85,6 +93,7 @@ Cloud Run Job: "media" (ffmpeg: WebM → MP4, thumbnails; transcription behind a
 ## Hosting (GCP)
 
 - `web`: Cloud Run service built from the repo `Dockerfile` (Next.js standalone output). It scales to zero.
-- `media`: Cloud Run Job with ffmpeg, triggered per upload.
-- Images live in Artifact Registry. Deploys run from GitHub Actions on `main` through Workload Identity Federation, with no long-lived keys.
-- Secrets live in Secret Manager and are mounted as env vars.
+- `media`: Cloud Run Job built from `media/Dockerfile` (system ffmpeg). Cloud Scheduler runs it every 2 minutes with `--once`: it drains the queue and exits, so it costs nothing while idle.
+- Images live in Artifact Registry. Deploys run from the manual **Deploy** workflow (`workflow_dispatch`) through Workload Identity Federation, with no long-lived keys.
+- Secrets live in Secret Manager and are mounted as env vars. `next build` doesn't need them; the server validates them all at start.
+- Step by step, including the accounts to create: [deploy.md](deploy.md).

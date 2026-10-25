@@ -26,7 +26,14 @@ export async function makeUser(label: string, domain = "test.cloqui.dev"): Promi
   })
   if (error || !data.user) throw error ?? new Error("createUser failed")
   created.push(data.user.id)
-  return { id: data.user.id, email, displayName: label, claims: { sub: data.user.id, email }, aal: "aal1", hasTwoFactor: false }
+  return {
+    id: data.user.id,
+    email,
+    displayName: label,
+    claims: { sub: data.user.id, email },
+    aal: "aal1",
+    hasTwoFactor: false,
+  }
 }
 
 export async function cleanupUsers() {

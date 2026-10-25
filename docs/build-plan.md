@@ -1,6 +1,15 @@
 # Cloqui build plan
 
-Status: Phases 0 through 5 done (2026-10-26).
+Status: Phases 0 through 6 built (2026-10-26). Deploying needs the accounts in [deploy.md](deploy.md), which only Jonel can create.
+
+Phase 6 changes from the plan:
+
+- Export is a JSON file, not a zip, and doesn't include video files (people download those from each video). A zip with files comes later.
+- The session list shows your own sessions. Admins can't sign a specific member out of their devices; removing them from the workspace cuts access at once. Coming later.
+- Handing a workspace to a new owner isn't built yet. Coming later; until then, an owner with other members in the workspace can't delete their account.
+- The `impeccable` skill isn't installed, so the polish pass was done by hand against `/cloqui-design` and `/hig` (summary in the Phase 6 commit notes). Installing it is your call.
+- `/tweak` is built (dev-only panel, Bake with contrast checks). The final visual pass with it is yours to do by eye: I haven't changed any colours with it.
+- Two of the three GSAP moments (landing hero, onboarding) became CSS keyframes with the same look, because the hero headline was waiting on JavaScript. GSAP remains for the recording countdown.
 
 Phase 5 changes from the plan:
 

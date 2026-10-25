@@ -31,19 +31,23 @@ Local Supabase uses ports 55320–55329, because Windows reserves the default 54
 
 ## Where things are
 
-| Path                     | What                                                              |
-| ------------------------ | ----------------------------------------------------------------- |
-| `src/app/(marketing)`    | Landing page                                                      |
-| `src/components/ui`      | shadcn/ui components, restyled to the Cloqui design system        |
-| `src/components/privacy` | `AccessChip`, `RecordingPill`, `AccessDenied`                     |
-| `supabase/`              | Local Supabase config and SQL migrations (including RLS policies) |
-| `e2e/`, `tests/`         | Playwright and Vitest suites                                      |
-| `docs/`                  | Build plan, architecture, security notes, design system           |
-| `.claude/skills/`        | `/cloqui-design` and `/cloqui-tone`, the design and copy rules    |
+| Path                     | What                                                               |
+| ------------------------ | ------------------------------------------------------------------ |
+| `src/app/(marketing)`    | Landing page                                                       |
+| `src/components/ui`      | shadcn/ui components, restyled to the Cloqui design system         |
+| `src/components/privacy` | `AccessChip`, `RecordingPill`, `AccessDenied`                      |
+| `supabase/`              | Local Supabase config and SQL migrations (including RLS policies)  |
+| `e2e/`, `tests/`         | Playwright and Vitest suites                                       |
+| `docs/`                  | Build plan, architecture, security notes, design system            |
+| `.claude/skills/`        | `/cloqui-design`, `/cloqui-tone` (design and copy rules), `/tweak` |
+| `Dockerfile`, `media/`   | Web app image, and the video worker with its own image             |
 
 ## Docs
 
 - [Build plan](docs/build-plan.md)
 - [Architecture](docs/architecture.md)
 - [Security notes](docs/security.md)
+- [Deploying](docs/deploy.md): the accounts to create, scheduled jobs, backups
+- [Limits](docs/limits.md): file sizes, rate limits, and which free tier runs out first
+- [Privacy policy draft](docs/privacy-policy-draft.md): for legal review, not ready to publish
 - [Design system preview](docs/design/preview.html), [contrast checks](docs/design/contrast.md), [components and licences](docs/design/components.md)

@@ -27,7 +27,11 @@ const withCode = (u: CurrentUser): CurrentUser => ({
 })
 
 const slug = `admin-${runId}`
-let owner: CurrentUser, admin: CurrentUser, member: CurrentUser, guest: CurrentUser, stranger: CurrentUser
+let owner: CurrentUser,
+  admin: CurrentUser,
+  member: CurrentUser,
+  guest: CurrentUser,
+  stranger: CurrentUser
 let ws: string, openChannel: string, privateChannel: string, space: string, videoId: string
 
 beforeAll(async () => {
@@ -43,11 +47,27 @@ beforeAll(async () => {
   await addMember(ws, admin.id, "admin")
   await addMember(ws, member.id, "member")
   await addMember(ws, guest.id, "guest")
-  openChannel = await createChannel(owner, slug, { name: "general", topic: "", isPrivate: false, memberIds: [member.id] })
-  privateChannel = await createChannel(owner, slug, { name: "board", topic: "", isPrivate: true, memberIds: [member.id] })
+  openChannel = await createChannel(owner, slug, {
+    name: "general",
+    topic: "",
+    isPrivate: false,
+    memberIds: [member.id],
+  })
+  privateChannel = await createChannel(owner, slug, {
+    name: "board",
+    topic: "",
+    isPrivate: true,
+    memberIds: [member.id],
+  })
   await postMessage(member, privateChannel, { body: "Board-only note" })
   space = await createSpace(owner, slug, { name: "Ops", isPrivate: true, memberIds: [member.id] })
-  videoId = (await createVideoUpload(member, slug, { title: "Member video", mimeType: "video/webm", sizeBytes: 5 })).videoId
+  videoId = (
+    await createVideoUpload(member, slug, {
+      title: "Member video",
+      mimeType: "video/webm",
+      sizeBytes: 5,
+    })
+  ).videoId
 })
 
 afterAll(cleanupUsers)
@@ -62,8 +82,12 @@ describe("require two-step sign-in", () => {
   })
 
   it("members and guests can't change it", async () => {
-    await expect(setRequireTwoFactor(withCode(member), slug, true)).rejects.toBeInstanceOf(AccessDeniedError)
-    await expect(setRequireTwoFactor(withCode(guest), slug, true)).rejects.toBeInstanceOf(AccessDeniedError)
+    await expect(setRequireTwoFactor(withCode(member), slug, true)).rejects.toBeInstanceOf(
+      AccessDeniedError
+    )
+    await expect(setRequireTwoFactor(withCode(guest), slug, true)).rejects.toBeInstanceOf(
+      AccessDeniedError
+    )
   })
 
   it("once required, a session without the code sees nothing, however access was given", async () => {
@@ -95,7 +119,9 @@ describe("require two-step sign-in", () => {
     const s = await getSecuritySettings(withCode(admin), slug)
     expect(s.require2fa).toBe(true)
     expect(s.membersWithoutTwoFactor.map((m) => m.id)).toContain(member.id)
-    await expect(getSecuritySettings(withCode(member), slug)).rejects.toBeInstanceOf(AccessDeniedError)
+    await expect(getSecuritySettings(withCode(member), slug)).rejects.toBeInstanceOf(
+      AccessDeniedError
+    )
     await expect(getSecuritySettings(stranger, slug)).rejects.toBeInstanceOf(AccessDeniedError)
   })
 })
@@ -127,28 +153,50 @@ describe("your own export", () => {
 
 describe("retention", () => {
   it("only admins can change it", async () => {
-    await expect(setRetention(member, slug, { retentionVideoDays: 30, retentionMessageDays: 30 })).rejects.toBeInstanceOf(AccessDeniedError)
+    await expect(
+      setRetention(member, slug, { retentionVideoDays: 30, retentionMessageDays: 30 })
+    ).rejects.toBeInstanceOf(AccessDeniedError)
   })
 
   it("deletes messages older than the setting and keeps newer ones", async () => {
     const oldId = await postMessage(owner, openChannel, { body: "From long ago" })
     const newId = await postMessage(owner, openChannel, { body: "From today" })
-    await systemDb.execute(sql`update public.chat_messages set created_at = now() - interval '40 days' where id = ${oldId}`)
+    await systemDb.execute(
+      sql`update public.chat_messages set created_at = now() - interval '40 days' where id = ${oldId}`
+    )
     await setRetention(admin, slug, { retentionVideoDays: null, retentionMessageDays: 30 })
     const res = await runRetention()
     expect(res.messagesDeleted).toBeGreaterThanOrEqual(1)
-    const left = await systemDb.execute<{ id: string }>(sql`select id from public.chat_messages where id in (${oldId}, ${newId})`)
+    const left = await systemDb.execute<{ id: string }>(
+      sql`select id from public.chat_messages where id in (${oldId}, ${newId})`
+    )
     expect(left.map((r) => r.id)).toEqual([newId])
     await setRetention(admin, slug, { retentionVideoDays: null, retentionMessageDays: null })
   })
 
   it("deletes videos older than the setting", async () => {
-    const fresh = (await createVideoUpload(member, slug, { title: "New one", mimeType: "video/webm", sizeBytes: 5 })).videoId
-    const old = (await createVideoUpload(member, slug, { title: "Old one", mimeType: "video/webm", sizeBytes: 5 })).videoId
-    await systemDb.execute(sql`update public.videos set created_at = now() - interval '100 days' where id = ${old}`)
+    const fresh = (
+      await createVideoUpload(member, slug, {
+        title: "New one",
+        mimeType: "video/webm",
+        sizeBytes: 5,
+      })
+    ).videoId
+    const old = (
+      await createVideoUpload(member, slug, {
+        title: "Old one",
+        mimeType: "video/webm",
+        sizeBytes: 5,
+      })
+    ).videoId
+    await systemDb.execute(
+      sql`update public.videos set created_at = now() - interval '100 days' where id = ${old}`
+    )
     await setRetention(admin, slug, { retentionVideoDays: 90, retentionMessageDays: null })
     await runRetention()
-    const left = await systemDb.execute<{ id: string }>(sql`select id from public.videos where id in (${old}, ${fresh})`)
+    const left = await systemDb.execute<{ id: string }>(
+      sql`select id from public.videos where id in (${old}, ${fresh})`
+    )
     expect(left.map((r) => r.id)).toEqual([fresh])
     await setRetention(admin, slug, { retentionVideoDays: null, retentionMessageDays: null })
   })
@@ -157,7 +205,9 @@ describe("retention", () => {
 describe("deleting", () => {
   it("only the owner can delete the workspace, and only by typing its name", async () => {
     await expect(deleteWorkspace(admin, slug, "Admin Co")).rejects.toBeInstanceOf(AccessDeniedError)
-    await expect(deleteWorkspace(stranger, slug, "Admin Co")).rejects.toBeInstanceOf(AccessDeniedError)
+    await expect(deleteWorkspace(stranger, slug, "Admin Co")).rejects.toBeInstanceOf(
+      AccessDeniedError
+    )
     await expect(deleteWorkspace(owner, slug, "Admin")).rejects.toBeInstanceOf(UserFacingError)
   })
 
@@ -166,7 +216,9 @@ describe("deleting", () => {
   })
 
   it("deleting your account needs your exact email", async () => {
-    await expect(deleteMyAccount(stranger, "nope@example.com")).rejects.toBeInstanceOf(UserFacingError)
+    await expect(deleteMyAccount(stranger, "nope@example.com")).rejects.toBeInstanceOf(
+      UserFacingError
+    )
   })
 
   it("the owner can delete it, and it's gone for everyone", async () => {

@@ -86,6 +86,50 @@ Set in `next.config.ts`. It blocks other origins for scripts, frames, plugins an
 - Sign-in, magic-link and reset forms give the same answer whether or not an account exists.
 - Invite links carry a 256-bit token. Only its SHA-256 hash is stored. The link works once, only for the invited email, and expires after 14 days.
 
+## Two-step sign-in
+
+- **TOTP** (authenticator apps) through Supabase Auth MFA. Set up and turned off from
+  Account and security; turning it off needs a current code.
+- **Half signed in is signed out.** With two-step on, a password alone gets a session at `aal1`.
+  `readSession()` treats that as signed out everywhere except the code screen (`/sign-in/2fa`).
+- **Workspaces can require it, enforced in the database.** `public.workspace_2fa_ok()` is checked
+  by every top-level access function: `workspace_role_of`, `video_role`, `live_room_role`,
+  `can_read_channel`, `can_manage_channel`, `can_read_space`, `can_manage_space` and
+  `shares_workspace_with`. So a direct share, a channel invite or a space invite doesn't get
+  around it. The `aal` claim comes from the verified JWT and is passed into the RLS claims.
+- An admin can only turn the requirement on from an `aal2` session, so nobody locks themselves out.
+- Code checks (setup, sign-in, turning it off) are rate-limited per account: 10 tries, then one
+  every 2 minutes. Supabase also limits verifications per IP.
+- Members who aren't set up see "Turn on two-step sign-in first" instead of a dead end. Admins
+  see who isn't set up before switching it on.
+
+## Your account and workspace data
+
+- **Sessions:** you see your own sign-ins (device, IP, last active). "Sign out everywhere" ends
+  every refresh token. Access tokens already issued keep working until they expire (at most 1 hour).
+- **Export:** `/api/account/export` has only what you wrote. `/api/w/<slug>/export` is for admins
+  and is read under the admin's own RLS, so private channels and spaces they aren't in stay out.
+  The workspace export is audit-logged. Both are sent with `Cache-Control: no-store`.
+- **Deleting:** your account needs your exact email; a workspace needs its exact name and the
+  owner role. Files go from storage first, then the rows. You can't delete your account while
+  you own a workspace with other people in it.
+- **Retention:** per workspace, 7 to 3,650 days for videos and messages. `POST /api/cron/retention`
+  runs it daily, behind the same `CRON_SECRET` check as reminders, and deletes the files too.
+
+## Automations
+
+- Set up only by people who can see the list. RLS refuses a notified person who can't see it,
+  a channel the creator can't read, and a status from another list.
+- Each run re-checks who can see the space, so someone removed since setup isn't notified.
+- **Channel posts carry a link, never the task title.** A channel can include people who can't
+  see the list; the link only opens for those who can.
+
+## Development tools
+
+- `/api/dev/tweak` (the `/tweak` Bake button) writes `globals.css`. It returns 404 unless
+  `NODE_ENV=development`, the host is localhost, and the request comes from the app's own origin.
+  Values must be plain hex colours and whole-pixel radii, so nothing else can be written.
+
 ## Fonts
 
 Cabinet Grotesk and Switzer come from Fontshare under the ITF Free Font License v2.0 (`docs/design/fonts/FFL.txt`):

@@ -37,7 +37,8 @@ function readCurrent(): TweakValues {
 function apply(v: TweakValues) {
   const root = document.documentElement.style
   for (const k of TWEAK_COLORS) if (isHex(v.colors[k])) root.setProperty(`--${k}`, v.colors[k])
-  for (const [size, px] of Object.entries(radiusScale(v.radiusMd))) root.setProperty(`--radius-${size}`, `${px}px`)
+  for (const [size, px] of Object.entries(radiusScale(v.radiusMd)))
+    root.setProperty(`--radius-${size}`, `${px}px`)
 }
 
 export function TweakPanel() {
@@ -126,7 +127,11 @@ function TweakEditor({ theme, onClose }: { theme: TweakTheme; onClose: () => voi
           <label key={k} className="flex min-h-11 items-center gap-2">
             <input
               type="color"
-              value={isHex(values.colors[k]) && values.colors[k].length === 7 ? values.colors[k] : "#000000"}
+              value={
+                isHex(values.colors[k]) && values.colors[k].length === 7
+                  ? values.colors[k]
+                  : "#000000"
+              }
               onChange={(e) => set(k, e.target.value)}
               className="size-11 shrink-0 cursor-pointer rounded-md border border-border bg-transparent"
             />
@@ -137,10 +142,15 @@ function TweakEditor({ theme, onClose }: { theme: TweakTheme; onClose: () => voi
       </div>
 
       <details>
-        <summary className="flex min-h-11 cursor-pointer items-center">Contrast (needs 4.5:1)</summary>
+        <summary className="flex min-h-11 cursor-pointer items-center">
+          Contrast (needs 4.5:1)
+        </summary>
         <ul className="grid gap-1 font-mono">
           {CONTRAST_PAIRS.map(([fg, bg]) => {
-            const r = isHex(values.colors[fg]) && isHex(values.colors[bg]) ? contrastRatio(values.colors[fg], values.colors[bg]) : 0
+            const r =
+              isHex(values.colors[fg]) && isHex(values.colors[bg])
+                ? contrastRatio(values.colors[fg], values.colors[bg])
+                : 0
             return (
               <li key={`${fg}-${bg}`} className={r < 4.5 ? "text-danger-ink" : "text-fg-secondary"}>
                 {fg} / {bg}: {r.toFixed(2)}
@@ -164,7 +174,10 @@ function TweakEditor({ theme, onClose }: { theme: TweakTheme; onClose: () => voi
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ theme, values }),
             })
-            const json = (await res.json().catch(() => ({}))) as { changed?: boolean; error?: string }
+            const json = (await res.json().catch(() => ({}))) as {
+              changed?: boolean
+              error?: string
+            }
             setStatus(
               res.ok
                 ? json.changed

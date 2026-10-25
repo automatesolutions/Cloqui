@@ -12,6 +12,8 @@ export const limits = {
   taskWrite: { capacity: 60, perHour: 1200 },
   // 5 tries, then one more every 5 minutes.
   passcode: { capacity: 5, perHour: 12 },
+  // Authenticator codes, per account: 10 tries, then one every 2 minutes.
+  twoFactor: { capacity: 10, perHour: 30 },
   // One "viewed" audit event per person per video every 30 minutes.
   viewLog: { capacity: 1, perHour: 2 },
 } as const

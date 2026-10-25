@@ -48,25 +48,49 @@ export async function revokeAllSessions(userId: string) {
 export async function exportMyData(user: CurrentUser) {
   const [profile] = await systemDb.select().from(profiles).where(eq(profiles.id, user.id))
   const memberships = await systemDb
-    .select({ workspace: workspaces.name, role: workspaceMembers.role, joinedAt: workspaceMembers.joinedAt })
+    .select({
+      workspace: workspaces.name,
+      role: workspaceMembers.role,
+      joinedAt: workspaceMembers.joinedAt,
+    })
     .from(workspaceMembers)
     .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
     .where(eq(workspaceMembers.userId, user.id))
   const myVideos = await systemDb
-    .select({ id: videos.id, title: videos.title, description: videos.description, createdAt: videos.createdAt, durationMs: videos.durationMs })
+    .select({
+      id: videos.id,
+      title: videos.title,
+      description: videos.description,
+      createdAt: videos.createdAt,
+      durationMs: videos.durationMs,
+    })
     .from(videos)
     .where(and(eq(videos.ownerId, user.id), isNull(videos.deletedAt)))
   const messages = await systemDb
-    .select({ body: chatMessages.body, createdAt: chatMessages.createdAt, channel: chatChannels.name, kind: chatChannels.kind })
+    .select({
+      body: chatMessages.body,
+      createdAt: chatMessages.createdAt,
+      channel: chatChannels.name,
+      kind: chatChannels.kind,
+    })
     .from(chatMessages)
     .innerJoin(chatChannels, eq(chatChannels.id, chatMessages.channelId))
     .where(and(eq(chatMessages.authorId, user.id), isNull(chatMessages.deletedAt)))
   const videoCommentRows = await systemDb
-    .select({ body: videoComments.body, atMs: videoComments.atMs, createdAt: videoComments.createdAt })
+    .select({
+      body: videoComments.body,
+      atMs: videoComments.atMs,
+      createdAt: videoComments.createdAt,
+    })
     .from(videoComments)
     .where(and(eq(videoComments.authorId, user.id), isNull(videoComments.deletedAt)))
   const myTasks = await systemDb
-    .select({ title: tasks.title, dueDate: tasks.dueDate, createdAt: tasks.createdAt, completedAt: tasks.completedAt })
+    .select({
+      title: tasks.title,
+      dueDate: tasks.dueDate,
+      createdAt: tasks.createdAt,
+      completedAt: tasks.completedAt,
+    })
     .from(tasks)
     .where(eq(tasks.createdBy, user.id))
   const taskCommentRows = await systemDb
@@ -80,7 +104,10 @@ export async function exportMyData(user: CurrentUser) {
     workspaces: memberships,
     videos: myVideos,
     videoComments: videoCommentRows,
-    messages: messages.map((m) => ({ ...m, channel: m.kind === "dm" ? "direct message" : `#${m.channel}` })),
+    messages: messages.map((m) => ({
+      ...m,
+      channel: m.kind === "dm" ? "direct message" : `#${m.channel}`,
+    })),
     tasksCreated: myTasks,
     taskComments: taskCommentRows,
   }
@@ -101,13 +128,20 @@ export async function deleteMyAccount(user: CurrentUser, confirmEmail: string) {
       sql`select count(*)::int as n from public.workspace_members where workspace_id = ${w.id} and user_id <> ${user.id}`
     )
     if (others.n > 0) {
-      throw new UserFacingError(`You own "${w.name}". Delete it first, in its Security settings. Handing a workspace to someone else is coming later.`)
+      throw new UserFacingError(
+        `You own "${w.name}". Delete it first, in its Security settings. Handing a workspace to someone else is coming later.`
+      )
     }
   }
   // Workspaces where you're alone go with you, files included.
   for (const w of owned) await deleteWorkspaceData(w.id)
   const mine = await systemDb
-    .select({ o: videos.originalKey, p: videos.playbackKey, t: videos.thumbnailKey, c: videos.captionsKey })
+    .select({
+      o: videos.originalKey,
+      p: videos.playbackKey,
+      t: videos.thumbnailKey,
+      c: videos.captionsKey,
+    })
     .from(videos)
     .where(eq(videos.ownerId, user.id))
   await deleteObjects(mine.flatMap((v) => [v.o, v.p ?? "", v.t ?? "", v.c ?? ""]))

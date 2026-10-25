@@ -79,4 +79,3 @@ export async function deleteObjects(keys: string[]) {
   const Objects = keys.filter(Boolean).map((Key) => ({ Key }))
   if (Objects.length) await s3.send(new DeleteObjectsCommand({ Bucket, Delete: { Objects } }))
 }
-

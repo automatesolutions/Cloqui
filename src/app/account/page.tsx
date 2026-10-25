@@ -14,14 +14,32 @@ export const metadata: Metadata = { title: "Account and security" }
 
 function describeAgent(ua: string | null) {
   if (!ua) return "Unknown device"
-  const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser"
-  const os = /Windows/.test(ua) ? "Windows" : /Mac OS X/.test(ua) ? "macOS" : /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : /Linux/.test(ua) ? "Linux" : ""
+  const browser = /Edg\//.test(ua)
+    ? "Edge"
+    : /Chrome\//.test(ua)
+      ? "Chrome"
+      : /Firefox\//.test(ua)
+        ? "Firefox"
+        : /Safari\//.test(ua)
+          ? "Safari"
+          : "Browser"
+  const os = /Windows/.test(ua)
+    ? "Windows"
+    : /Mac OS X/.test(ua)
+      ? "macOS"
+      : /Android/.test(ua)
+        ? "Android"
+        : /iPhone|iPad/.test(ua)
+          ? "iOS"
+          : /Linux/.test(ua)
+            ? "Linux"
+            : ""
   return os ? `${browser} on ${os}` : browser
 }
 
 export default function AccountPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<AccountSkeleton />}>
       <Body />
     </Suspense>
   )
@@ -49,26 +67,46 @@ async function Body() {
           </p>
         </div>
 
-        <section aria-labelledby="you-h" className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6">
-          <h2 id="you-h" className="text-title-3 font-medium">Profile</h2>
+        <section
+          aria-labelledby="you-h"
+          className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6"
+        >
+          <h2 id="you-h" className="text-title-3 font-medium">
+            Profile
+          </h2>
           <NameForm name={user.displayName} />
         </section>
 
-        <section aria-labelledby="tfa-h" className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6">
-          <h2 id="tfa-h" className="text-title-3 font-medium">Two-step sign-in</h2>
+        <section
+          aria-labelledby="tfa-h"
+          className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6"
+        >
+          <h2 id="tfa-h" className="text-title-3 font-medium">
+            Two-step sign-in
+          </h2>
           <TwoFactorSection enabled={user.hasTwoFactor} />
         </section>
 
-        <section aria-labelledby="ses-h" className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6">
-          <h2 id="ses-h" className="text-title-3 font-medium">Where you&apos;re signed in</h2>
+        <section
+          aria-labelledby="ses-h"
+          className="grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6"
+        >
+          <h2 id="ses-h" className="text-title-3 font-medium">
+            Where you&apos;re signed in
+          </h2>
           <ul className="divide-y divide-border rounded-md border border-border">
             {sessions.map((s) => (
               <li key={s.id} className="flex items-center gap-3 px-4 py-3">
-                <Monitor aria-hidden className="size-5 shrink-0 text-fg-secondary" strokeWidth={1.75} />
+                <Monitor
+                  aria-hidden
+                  className="size-5 shrink-0 text-fg-secondary"
+                  strokeWidth={1.75}
+                />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-callout">{describeAgent(s.userAgent)}</span>
                   <span className="block text-footnote text-fg-secondary">
-                    {s.ip ?? "Unknown location"} · last active {relativeDate(new Date(s.lastSeenAt ?? s.createdAt))}
+                    {s.ip ?? "Unknown location"} · last active{" "}
+                    {relativeDate(new Date(s.lastSeenAt ?? s.createdAt))}
                     {s.aal === "aal2" ? " · two-step" : ""}
                   </span>
                 </span>
@@ -76,17 +114,26 @@ async function Body() {
             ))}
           </ul>
           <form action={signOutEverywhereAction}>
-            <Button type="submit" variant="secondary">Sign out everywhere</Button>
+            <Button type="submit" variant="secondary">
+              Sign out everywhere
+            </Button>
           </form>
           <p className="text-footnote text-fg-secondary">
-            Ends every session, including this one. Devices that are already open stop working within an hour at most.
+            Ends every session, including this one. Devices that are already open stop working
+            within an hour at most.
           </p>
         </section>
 
-        <section aria-labelledby="exp-h" className="grid gap-3 rounded-lg border border-border bg-surface p-5 md:p-6">
-          <h2 id="exp-h" className="text-title-3 font-medium">Your data</h2>
+        <section
+          aria-labelledby="exp-h"
+          className="grid gap-3 rounded-lg border border-border bg-surface p-5 md:p-6"
+        >
+          <h2 id="exp-h" className="text-title-3 font-medium">
+            Your data
+          </h2>
           <p className="text-callout text-fg-secondary">
-            Download everything you created: videos (details, not files), messages, comments and tasks. Nothing other people wrote.
+            Download everything you created: videos (details, not files), messages, comments and
+            tasks. Nothing other people wrote.
           </p>
           <Button variant="secondary" asChild className="justify-self-start">
             <a href="/api/account/export" download>
@@ -96,14 +143,31 @@ async function Body() {
           </Button>
         </section>
 
-        <section aria-labelledby="del-h" className="grid gap-3 rounded-lg border border-danger/30 bg-surface p-5 md:p-6">
-          <h2 id="del-h" className="text-title-3 font-medium">Delete account</h2>
+        <section
+          aria-labelledby="del-h"
+          className="grid gap-3 rounded-lg border border-danger/30 bg-surface p-5 md:p-6"
+        >
+          <h2 id="del-h" className="text-title-3 font-medium">
+            Delete account
+          </h2>
           <p className="text-callout text-fg-secondary">
-            If you own a workspace with other people in it, delete it first, in its Security settings. Handing a workspace to someone else is coming later.
+            If you own a workspace with other people in it, delete it first, in its Security
+            settings. Handing a workspace to someone else is coming later.
           </p>
           <DeleteAccountSection email={user.email} />
         </section>
       </main>
+    </div>
+  )
+}
+
+function AccountSkeleton() {
+  return (
+    <div aria-busy className="container-page grid max-w-3xl gap-10 pt-20 pb-16">
+      <div className="h-10 w-72 rounded-md bg-raised" />
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="h-40 rounded-lg border border-border bg-surface" />
+      ))}
     </div>
   )
 }

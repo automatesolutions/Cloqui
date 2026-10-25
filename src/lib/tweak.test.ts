@@ -41,7 +41,11 @@ describe("validateTweak", () => {
 
 describe("bakeTokens", () => {
   it("changes only the chosen theme and the radii", () => {
-    const next = { ...dark, radiusMd: 12, colors: { ...dark.colors, accent: "#33ddb0", "accent-ink": "#33ddb0" } }
+    const next = {
+      ...dark,
+      radiusMd: 12,
+      colors: { ...dark.colors, accent: "#33ddb0", "accent-ink": "#33ddb0" },
+    }
     const out = bakeTokens(css, "dark", next)
     const darkBlock = out.match(/:root,\s*\.dark\s*\{[\s\S]*?\n\}/)![0]
     const lightBlock = out.match(/\n\.light\s*\{[\s\S]*?\n\}/)![0]

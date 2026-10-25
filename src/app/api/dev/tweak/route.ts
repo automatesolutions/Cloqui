@@ -15,7 +15,10 @@ function allowed(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!allowed(request)) return new NextResponse(null, { status: 404 })
-  const body = (await request.json().catch(() => null)) as { theme?: TweakTheme; values?: TweakValues } | null
+  const body = (await request.json().catch(() => null)) as {
+    theme?: TweakTheme
+    values?: TweakValues
+  } | null
   if (!body || (body.theme !== "dark" && body.theme !== "light") || !body.values) {
     return NextResponse.json({ error: "Send { theme, values }." }, { status: 400 })
   }

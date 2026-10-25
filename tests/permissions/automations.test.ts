@@ -5,7 +5,14 @@ import { AccessDeniedError } from "@/server/authz"
 import { createAutomation, deleteAutomation, listAutomations } from "@/server/automations"
 import { createChannel } from "@/server/chat"
 import { systemDb } from "@/server/db"
-import { createList, createSpace, createTask, getListView, moveTask, updateTask } from "@/server/tasks"
+import {
+  createList,
+  createSpace,
+  createTask,
+  getListView,
+  moveTask,
+  updateTask,
+} from "@/server/tasks"
 import { createWorkspace, UserFacingError } from "@/server/workspaces"
 import { addMember, cleanupUsers, makeUser, runId, visibleCount, wsIdBySlug } from "./helpers"
 
@@ -31,13 +38,27 @@ beforeAll(async () => {
   const ws = await wsIdBySlug(slug)
   await addMember(ws, ben.id, "member")
   await addMember(ws, cy.id, "member")
-  const space = await createSpace(ana, slug, { name: "Hiring", isPrivate: true, memberIds: [ben.id] })
+  const space = await createSpace(ana, slug, {
+    name: "Hiring",
+    isPrivate: true,
+    memberIds: [ben.id],
+  })
   privateList = await createList(ana, space, { name: "Candidates" })
   otherList = await createList(ana, space, { name: "Other" })
   doneStatus = (await getListView(ana, privateList))!.statuses.find((s) => s.kind === "done")!.id
   otherListStatus = (await getListView(ana, otherList))!.statuses[0].id
-  channel = await createChannel(ana, slug, { name: "general", topic: "", isPrivate: false, memberIds: [cy.id] })
-  anaOnlyChannel = await createChannel(ana, slug, { name: "ana-only", topic: "", isPrivate: true, memberIds: [] })
+  channel = await createChannel(ana, slug, {
+    name: "general",
+    topic: "",
+    isPrivate: false,
+    memberIds: [cy.id],
+  })
+  anaOnlyChannel = await createChannel(ana, slug, {
+    name: "ana-only",
+    topic: "",
+    isPrivate: true,
+    memberIds: [],
+  })
 })
 
 afterAll(async () => {
@@ -47,8 +68,12 @@ afterAll(async () => {
 
 describe("setting up automations", () => {
   it("people who can't see the list can't add, read or remove them", async () => {
-    await expect(createAutomation(cy, privateList, { statusId: doneStatus, action: "notify_assignees" })).rejects.toBeInstanceOf(AccessDeniedError)
-    await expect(createAutomation(stranger, privateList, { statusId: doneStatus, action: "notify_assignees" })).rejects.toBeInstanceOf(AccessDeniedError)
+    await expect(
+      createAutomation(cy, privateList, { statusId: doneStatus, action: "notify_assignees" })
+    ).rejects.toBeInstanceOf(AccessDeniedError)
+    await expect(
+      createAutomation(stranger, privateList, { statusId: doneStatus, action: "notify_assignees" })
+    ).rejects.toBeInstanceOf(AccessDeniedError)
     await expect(listAutomations(cy, privateList)).rejects.toBeInstanceOf(AccessDeniedError)
 
     await createAutomation(ana, privateList, { statusId: doneStatus, action: "notify_assignees" })
@@ -60,41 +85,66 @@ describe("setting up automations", () => {
 
   it("can't notify someone who can't see the list", async () => {
     await expect(
-      createAutomation(ana, privateList, { statusId: doneStatus, action: "notify_user", targetUserId: cy.id })
+      createAutomation(ana, privateList, {
+        statusId: doneStatus,
+        action: "notify_user",
+        targetUserId: cy.id,
+      })
     ).rejects.toBeInstanceOf(UserFacingError)
   })
 
   it("can't use a status from another list", async () => {
-    await expect(createAutomation(ana, privateList, { statusId: otherListStatus, action: "notify_assignees" })).rejects.toBeInstanceOf(UserFacingError)
+    await expect(
+      createAutomation(ana, privateList, { statusId: otherListStatus, action: "notify_assignees" })
+    ).rejects.toBeInstanceOf(UserFacingError)
   })
 
   it("can't post to a channel the person setting it up can't read", async () => {
     await expect(
-      createAutomation(ben, privateList, { statusId: doneStatus, action: "post_channel", targetChannelId: anaOnlyChannel })
+      createAutomation(ben, privateList, {
+        statusId: doneStatus,
+        action: "post_channel",
+        targetChannelId: anaOnlyChannel,
+      })
     ).rejects.toBeInstanceOf(UserFacingError)
   })
 })
 
 describe("running automations", () => {
   it("moving a task notifies its assignees, but not the person who moved it", async () => {
-    const t = await createTask(ana, privateList, { title: "Offer for Maria", assigneeIds: [ana.id, ben.id] })
+    const t = await createTask(ana, privateList, {
+      title: "Offer for Maria",
+      assigneeIds: [ana.id, ben.id],
+    })
     await moveTask(ana, t, doneStatus, 1)
     expect(await notificationsFor(ben, t)).toHaveLength(1)
     expect(await notificationsFor(ana, t)).toHaveLength(0)
   })
 
   it("someone who lost access since setup isn't notified", async () => {
-    await createAutomation(ana, privateList, { statusId: doneStatus, action: "notify_user", targetUserId: ben.id })
+    await createAutomation(ana, privateList, {
+      statusId: doneStatus,
+      action: "notify_user",
+      targetUserId: ben.id,
+    })
     const t = await createTask(ana, privateList, { title: "Reference checks" })
     const spaceId = (await getListView(ana, privateList))!.space.id
-    await systemDb.execute(sql`delete from public.task_space_members where space_id = ${spaceId} and user_id = ${ben.id}`)
+    await systemDb.execute(
+      sql`delete from public.task_space_members where space_id = ${spaceId} and user_id = ${ben.id}`
+    )
     await updateTask(ana, t, { statusId: doneStatus })
     expect(await notificationsFor(ben, t)).toHaveLength(0)
-    await systemDb.execute(sql`insert into public.task_space_members (space_id, user_id, role) values (${spaceId}, ${ben.id}, 'member')`)
+    await systemDb.execute(
+      sql`insert into public.task_space_members (space_id, user_id, role) values (${spaceId}, ${ben.id}, 'member')`
+    )
   })
 
   it("a channel post links to the task without saying what it is", async () => {
-    await createAutomation(ana, privateList, { statusId: doneStatus, action: "post_channel", targetChannelId: channel })
+    await createAutomation(ana, privateList, {
+      statusId: doneStatus,
+      action: "post_channel",
+      targetChannelId: channel,
+    })
     const t = await createTask(ana, privateList, { title: "Salary for Maria" })
     await updateTask(ana, t, { statusId: doneStatus })
     const posts = await systemDb.execute<{ body: string }>(

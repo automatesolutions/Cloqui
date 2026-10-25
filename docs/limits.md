@@ -5,28 +5,29 @@ check each provider's pricing page before relying on them.
 
 ## In the app
 
-| What | Limit | Where it's set |
-| --- | --- | --- |
-| Video upload size | 2 GB | `MAX_UPLOAD_BYTES` in `src/server/videos.ts` |
-| Chat attachment size | 100 MB | `chat_attachments` check in the chat migration |
-| Playback link lifetime | 5 minutes (30 s to 1 h) | `SIGNED_URL_TTL_SECONDS` |
-| Message retention | 7 to 3,650 days, or forever (default) | Workspace → Settings → Security |
-| Video retention | 7 to 3,650 days, or forever (default) | Workspace → Settings → Security |
+| What                   | Limit                                 | Where it's set                                 |
+| ---------------------- | ------------------------------------- | ---------------------------------------------- |
+| Video upload size      | 2 GB                                  | `MAX_UPLOAD_BYTES` in `src/server/videos.ts`   |
+| Chat attachment size   | 100 MB                                | `chat_attachments` check in the chat migration |
+| Playback link lifetime | 5 minutes (30 s to 1 h)               | `SIGNED_URL_TTL_SECONDS`                       |
+| Message retention      | 7 to 3,650 days, or forever (default) | Workspace → Settings → Security                |
+| Video retention        | 7 to 3,650 days, or forever (default) | Workspace → Settings → Security                |
 
 ### Rate limits (per person)
 
 Token buckets in Postgres (`src/server/rate-limit.ts`). "Burst" is how many you can do at once;
 "per hour" is how fast it refills.
 
-| Action | Burst | Per hour |
-| --- | --- | --- |
-| Invites | 30 | 30 |
-| Access requests | 5 | 10 |
-| New workspaces | 5 | 5 |
-| Uploads | 50 | 50 |
-| Chat messages | 30 | 1,200 |
-| Task changes | 60 | 1,200 |
-| Video passcode tries | 5 | 12 |
+| Action               | Burst | Per hour |
+| -------------------- | ----- | -------- |
+| Invites              | 30    | 30       |
+| Access requests      | 5     | 10       |
+| New workspaces       | 5     | 5        |
+| Uploads              | 50    | 50       |
+| Chat messages        | 30    | 1,200    |
+| Task changes         | 60    | 1,200    |
+| Video passcode tries | 5     | 12       |
+| Authenticator codes  | 10    | 30       |
 
 Supabase Auth adds its own limits on sign-in and email sending.
 

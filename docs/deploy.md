@@ -10,13 +10,13 @@ settings below exist.
 
 ## 1. Accounts only you can create
 
-| Service | What it's for | Free tier | What to copy out |
-| --- | --- | --- | --- |
-| [Supabase](https://supabase.com) | Database, sign-in, realtime | 2 projects, 500 MB DB, 50k monthly users. Free projects pause after 7 days without traffic. | Project URL, anon key, service-role key, pooler connection string (port 6543) |
-| [Google Cloud](https://console.cloud.google.com) | Runs the app (Cloud Run) and the video worker (Cloud Run Jobs) | 2M requests and 180k vCPU-seconds a month | Project ID, region (e.g. `asia-southeast1`) |
-| [Cloudflare R2](https://dash.cloudflare.com) | Private video and file storage | 10 GB stored, no egress fees | Account ID endpoint, an API token with read/write on one bucket |
-| [LiveKit Cloud](https://cloud.livekit.io) | Live rooms and huddles | Free "Build" plan (limited participant minutes) | WebSocket URL, API key, API secret |
-| [Resend](https://resend.com) | Invite and notification email | 3,000 emails a month, 100 a day | API key, and a verified sending domain |
+| Service                                          | What it's for                                                  | Free tier                                                                                   | What to copy out                                                              |
+| ------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [Supabase](https://supabase.com)                 | Database, sign-in, realtime                                    | 2 projects, 500 MB DB, 50k monthly users. Free projects pause after 7 days without traffic. | Project URL, anon key, service-role key, pooler connection string (port 6543) |
+| [Google Cloud](https://console.cloud.google.com) | Runs the app (Cloud Run) and the video worker (Cloud Run Jobs) | 2M requests and 180k vCPU-seconds a month                                                   | Project ID, region (e.g. `asia-southeast1`)                                   |
+| [Cloudflare R2](https://dash.cloudflare.com)     | Private video and file storage                                 | 10 GB stored, no egress fees                                                                | Account ID endpoint, an API token with read/write on one bucket               |
+| [LiveKit Cloud](https://cloud.livekit.io)        | Live rooms and huddles                                         | Free "Build" plan (limited participant minutes)                                             | WebSocket URL, API key, API secret                                            |
+| [Resend](https://resend.com)                     | Invite and notification email                                  | 3,000 emails a month, 100 a day                                                             | API key, and a verified sending domain                                        |
 
 Google and Microsoft sign-in are optional. If you want them, create OAuth clients and paste the
 IDs into Supabase → Authentication → Providers.
@@ -72,11 +72,11 @@ Actions → Deploy → Run workflow. It applies migrations, builds both images, 
 
 ## 5. Scheduled jobs (Cloud Scheduler)
 
-| Job | Schedule | Target |
-| --- | --- | --- |
-| Video processing | every 2 minutes | Run the `cloqui-media` job |
-| Task reminders | every 15 minutes | `POST https://<app>/api/cron/reminders` with header `Authorization: Bearer <cron-secret>` |
-| Retention | daily | `POST https://<app>/api/cron/retention` with the same header |
+| Job              | Schedule         | Target                                                                                    |
+| ---------------- | ---------------- | ----------------------------------------------------------------------------------------- |
+| Video processing | every 2 minutes  | Run the `cloqui-media` job                                                                |
+| Task reminders   | every 15 minutes | `POST https://<app>/api/cron/reminders` with header `Authorization: Bearer <cron-secret>` |
+| Retention        | daily            | `POST https://<app>/api/cron/retention` with the same header                              |
 
 The free tier includes 3 Scheduler jobs, which is exactly these three.
 

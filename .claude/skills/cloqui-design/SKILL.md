@@ -147,7 +147,7 @@ Calm and purposeful. Things settle into place; they never bounce or flash.
 - Enter: fade + max 8 px slide (drawers slide their full width). Leave: fade only.
 - Press: `scale(0.98)` for 150 ms on buttons. No hover lifts on cards; use a border/colour change.
 - **Recording / live pulse:** the red dot fades between 100% and 45% opacity over 2 s, ease-in-out, looping. Never scale it. Always paired with the words "You are recording" or "Live".
-- **GSAP only for three signature moments:** landing hero reveal, onboarding step transitions, recording countdown (3-2-1). Everything else is CSS transitions.
+- **GSAP only for the recording countdown (3-2-1).** The landing hero and onboarding entrances use the same curve and timing as CSS keyframes (`[data-hero-reveal]` in globals.css), so they start at first paint. Everything else is CSS transitions.
 - `prefers-reduced-motion: reduce`: slides and scales become fades of ≤150 ms; the pulse becomes a static dot; the countdown shows the numbers without animation; GSAP timelines jump to their end state.
 - Banned: confetti, particles, shatter, shimmer on text, parallax, auto-playing loops, spring overshoot.
 
@@ -200,6 +200,7 @@ Loading (skeletons in `raised` with no shimmer, a 150 ms fade-in after 300 ms so
 
 ## 11. Changelog
 
+- 2026-10-26 · v1.0.3: hero and onboarding entrances moved from GSAP to CSS keyframes, same look. The hero headline is the largest paint and was waiting on JavaScript: Lighthouse performance 88 → 93.
 - 2026-10-26 · v1.0.2: dark `text-muted` #7A869C → #8290A6. axe caught 4.17:1 on raised surfaces (drawers, menus).
 - 2026-10-25 · v1.0.1: light `text-muted` #6B7689 → #626D80. axe caught 4.28:1 on the light page background.
 - 2026-10-25 · v1.0 approved as drafted.
