@@ -8,6 +8,7 @@ import {
   MessageSquare,
   MessageSquareReply,
   TriangleAlert,
+  Zap,
 } from "lucide-react"
 import { EmptyState } from "@/components/app/empty-state"
 import { PageHeader } from "@/components/app/page-header"
@@ -30,6 +31,7 @@ const kinds: Record<string, { icon: typeof Bell; text: (actor: string) => string
   task_mention: { icon: AtSign, text: (a) => `${a} mentioned you on a task` },
   task_due_soon: { icon: AlarmClock, text: () => "A task assigned to you is due soon" },
   task_overdue: { icon: TriangleAlert, text: () => "A task assigned to you is overdue" },
+  task_status: { icon: Zap, text: (a) => `${a} moved a task` },
 }
 
 function hrefFor(n: Item) {

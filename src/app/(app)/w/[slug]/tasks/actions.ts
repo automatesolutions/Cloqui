@@ -31,6 +31,7 @@ import {
   toggleChecklistItem,
   updateTask,
 } from "@/server/tasks"
+import { createAutomation, deleteAutomation } from "@/server/automations"
 import { UserFacingError } from "@/server/workspaces"
 
 type Result<T = object> = ({ ok: true } & T) | { ok: false; message: string }
@@ -294,4 +295,26 @@ export async function taskFromVideoAction(
     const taskId = await taskFromVideo(await requireUser(), id.parse(videoId), id.parse(listId))
     return { url: `/w/${slug}/tasks/${listId}?task=${taskId}` }
   })
+}
+
+// ── Automations ─────────────────────────────────────────────────────────────
+
+const automationInput = z.discriminatedUnion("action", [
+  z.object({ statusId: id, action: z.literal("notify_assignees") }),
+  z.object({ statusId: id, action: z.literal("notify_user"), targetUserId: id }),
+  z.object({ statusId: id, action: z.literal("post_channel"), targetChannelId: id }),
+])
+
+export async function createAutomationAction(slug: string, listId: string, input: unknown) {
+  return run(
+    async () => createAutomation(await requireUser(), id.parse(listId), automationInput.parse(input)),
+    `/w/${slug}/tasks/${listId}`
+  )
+}
+
+export async function deleteAutomationAction(slug: string, listId: string, automationId: string) {
+  return run(
+    async () => deleteAutomation(await requireUser(), id.parse(automationId)),
+    `/w/${slug}/tasks/${listId}`
+  )
 }

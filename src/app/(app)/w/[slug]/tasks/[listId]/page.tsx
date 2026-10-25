@@ -4,6 +4,7 @@ import { ArrowLeft, Hash } from "lucide-react"
 import { AccessChip } from "@/components/privacy/access-chip"
 import { AccessDenied } from "@/components/privacy/access-denied"
 import { Button } from "@/components/ui/button"
+import { AutomationsDialog } from "@/components/tasks/automations-dialog"
 import { ListToolbar } from "@/components/tasks/list-toolbar"
 import { TaskDrawer } from "@/components/tasks/task-drawer"
 import {
@@ -14,6 +15,7 @@ import {
   TimelineView,
 } from "@/components/tasks/views"
 import { requireUser } from "@/server/auth"
+import { listAutomations, listPostableChannels } from "@/server/automations"
 import type { TaskFilters, TaskPriority } from "@/server/db/schema"
 import { getListView, listSavedViews, listTasks } from "@/server/tasks"
 
@@ -56,9 +58,11 @@ export default async function ListPage({
     q: str("q")?.slice(0, 100),
   }
   const mode = (["board", "calendar", "timeline"] as const).find((v) => v === str("view")) ?? "list"
-  const [rows, saved] = await Promise.all([
+  const [rows, saved, automations, channels] = await Promise.all([
     listTasks(user, listId, filters),
     listSavedViews(user, listId),
+    listAutomations(user, listId),
+    listPostableChannels(user, listId),
   ])
   const month = /^\d{4}-\d{2}$/.test(str("month") ?? "")
     ? str("month")!
@@ -88,6 +92,14 @@ export default async function ListPage({
               </Link>
             </Button>
           )}
+          <AutomationsDialog
+            slug={slug}
+            listId={listId}
+            automations={automations}
+            statuses={view.statuses.map((s) => ({ id: s.id, name: s.name }))}
+            people={view.people.filter((p) => p.id !== user.id)}
+            channels={channels}
+          />
           <AccessChip
             label={
               view.space.isPrivate

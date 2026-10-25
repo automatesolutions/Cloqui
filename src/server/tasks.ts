@@ -2,6 +2,7 @@ import "server-only"
 import { and, asc, desc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm"
 import type { CurrentUser } from "@/server/auth"
 import { AccessDeniedError, authorize } from "@/server/authz"
+import { runAutomations } from "@/server/automations"
 import { systemDb, withRls, type Tx } from "@/server/db"
 import {
   chatChannels,
@@ -530,6 +531,9 @@ export async function updateTask(user: CurrentUser, taskId: string, patch: TaskP
       throw new UserFacingError("Check the dates: the start can't be after the due date.")
     throw e
   }
+  if (patch.statusId && patch.statusId !== before.statusId) {
+    await runAutomations(user, before, patch.statusId)
+  }
 }
 
 /** Board drag and drop: change status and place between neighbours. */
@@ -550,6 +554,7 @@ export async function moveTask(
       await logActivity(tx, taskId, user.id, "status", { to: st?.name })
     }
   })
+  if (statusId !== before.statusId) await runAutomations(user, before, statusId)
 }
 
 export async function setAssignees(user: CurrentUser, taskId: string, userIds: string[]) {
