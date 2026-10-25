@@ -1,6 +1,11 @@
 # Cloqui build plan
 
-Status: Phases 0, 1, 2 and 3 done (2026-10-26).
+Status: Phases 0 through 4 done (2026-10-26).
+
+Phase 4 changes from the plan:
+
+- Guests can be added to channels by the rules, but the chat screens live inside the workspace shell, which guests can't open. Guest chat screens come later.
+- Message lists refetch through server actions on each realtime event (simple and always access-checked), rather than applying change rows directly.
 
 Phase 3 changes from the plan:
 

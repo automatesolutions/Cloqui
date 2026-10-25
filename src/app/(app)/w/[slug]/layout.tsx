@@ -7,6 +7,9 @@ import { UserMenu, WorkspaceSwitcher } from "@/components/app/shell-menus"
 import { AccessDenied } from "@/components/privacy/access-denied"
 import { requireUser } from "@/server/auth"
 import { getWorkspaceAccess } from "@/server/authz"
+import { MainFrame } from "@/components/app/main-frame"
+import { NotificationBell } from "@/components/app/notification-bell"
+import { unreadNotificationCount } from "@/server/chat"
 import { listMyWorkspaces } from "@/server/workspaces"
 
 export default function WorkspaceLayout({ children, params }: LayoutProps<"/w/[slug]">) {
@@ -47,7 +50,11 @@ async function Shell({
     )
   }
 
-  const workspaces = (await listMyWorkspaces(user)).filter((w) => w.role !== "guest")
+  const [allWorkspaces, unread] = await Promise.all([
+    listMyWorkspaces(user),
+    unreadNotificationCount(user),
+  ])
+  const workspaces = allWorkspaces.filter((w) => w.role !== "guest")
   const current = { name: access.workspace.name, slug: access.workspace.slug }
 
   return (
@@ -74,11 +81,10 @@ async function Shell({
             <WorkspaceSwitcher current={current} workspaces={workspaces} />
           </div>
           <div className="hidden flex-1 lg:block" />
+          <NotificationBell key={unread} slug={slug} userId={user.id} initial={unread} />
           <UserMenu name={user.displayName} email={user.email} />
         </header>
-        <main id="main" className="flex-1 px-4 pt-8 pb-28 md:px-6 lg:px-8 lg:pb-16">
-          <div className="mx-auto w-full max-w-5xl">{children}</div>
-        </main>
+        <MainFrame>{children}</MainFrame>
       </div>
 
       <MobileTabBar slug={slug} />

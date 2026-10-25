@@ -49,6 +49,17 @@ What Cloqui protects, how, and what it does **not** claim. Keep this honest. If 
 - **Encryption:** media is encrypted in transit (WebRTC DTLS-SRTP) between each person and the LiveKit server. It is not end-to-end encrypted. In-room chat goes over the same connection and isn't stored by Cloqui.
 - **Recording live rooms is "Coming later".** It needs LiveKit Egress, which may not be on the free tier. We'll ask before adding anything paid.
 
+## Chat
+
+- **One read rule:** `public.can_read_channel()`. Private channels and DMs are readable only by their members. Open channels are readable by full workspace members; guests can't read them unless added.
+- **Membership:** nobody joins a private channel on their own. Added people must already belong to the workspace. DM membership is fixed when the DM is created.
+- **Search** runs under RLS, so private conversations you're not in are never searched.
+- **Mentions** only notify people who can read the conversation. Notifications are readable only by their owner and are written only by the server.
+- **Attachments** are private objects with 2-minute signed download links, issued after a channel-access check. Files can be up to 100 MB.
+- **Video cards** show the title and thumbnail only to people who can watch the video. Everyone else sees a locked card with a way to ask for access.
+- **Realtime:** message events are Postgres changes filtered by RLS for each subscriber, and the client refetches through server actions. Typing and presence use private realtime topics (`chat:<id>`) authorized by policies on `realtime.messages`.
+- **Not end-to-end encrypted.** Messages are stored on the server so they can be searched.
+
 ## Content Security Policy
 
 Set in `next.config.ts`. It blocks other origins for scripts, frames, plugins and form posts, and forbids framing Cloqui (`frame-ancestors 'none'`).
@@ -57,7 +68,7 @@ Set in `next.config.ts`. It blocks other origins for scripts, frames, plugins an
 
 ## Sessions and auth
 
-- Sessions live in HTTP-only Supabase cookies, refreshed by `src/proxy.ts`.
+- Sessions live in Supabase auth cookies, refreshed by `src/proxy.ts`. They are **not** HTTP-only: Cloqui's own browser code reads them to authenticate realtime connections. They're `SameSite=Lax` and `Secure` in production, and the CSP blocks scripts from other origins. (An earlier version of this page wrongly said HTTP-only.)
 - The server trusts only verified JWT claims (`getClaims()`), never the client.
 - Anything that reads the session is request-time only (`connection()`), so it's never baked into a cached or prerendered page.
 - Email links use one-time `token_hash` links that work on any device and expire in 1 hour.

@@ -208,6 +208,7 @@ export const liveRooms = pgTable("live_rooms", {
   waitingRoom: boolean("waiting_room").notNull().default(true),
   locked: boolean("locked").notNull().default(false),
   workspaceVisible: boolean("workspace_visible").notNull().default(false),
+  channelId: uuid("channel_id"),
   lastActiveAt: ts("last_active_at"),
   createdAt: ts("created_at").notNull().defaultNow(),
   endedAt: ts("ended_at"),
@@ -234,3 +235,89 @@ export const liveRoomAdmissions = pgTable(
   },
   (t) => [primaryKey({ columns: [t.roomId, t.userId] })]
 )
+
+// ── Phase 4: chat and notifications ─────────────────────────────────────────
+export const chatKind = pgEnum("chat_kind", ["channel", "dm"])
+export const notifyLevel = pgEnum("notify_level", ["all", "mentions", "none"])
+export type NotifyLevel = (typeof notifyLevel.enumValues)[number]
+
+export const chatChannels = pgTable("chat_channels", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  kind: chatKind("kind").notNull().default("channel"),
+  name: text("name"),
+  topic: text("topic").notNull().default(""),
+  isPrivate: boolean("is_private").notNull().default(false),
+  dmKey: text("dm_key"),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  archivedAt: ts("archived_at"),
+})
+
+export const chatMembers = pgTable(
+  "chat_members",
+  {
+    channelId: uuid("channel_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    role: text("role").$type<"admin" | "member">().notNull().default("member"),
+    notify: notifyLevel("notify").notNull().default("all"),
+    lastReadAt: ts("last_read_at").notNull().defaultNow(),
+    joinedAt: ts("joined_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.channelId, t.userId] })]
+)
+
+export const chatMessages = pgTable("chat_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  channelId: uuid("channel_id").notNull(),
+  authorId: uuid("author_id").notNull(),
+  parentId: uuid("parent_id"),
+  body: text("body").notNull().default(""),
+  mentions: uuid("mentions").array().notNull().default([]),
+  mentionChannel: boolean("mention_channel").notNull().default(false),
+  videoId: uuid("video_id"),
+  replyCount: integer("reply_count").notNull().default(0),
+  lastReplyAt: ts("last_reply_at"),
+  pinnedAt: ts("pinned_at"),
+  pinnedBy: uuid("pinned_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  editedAt: ts("edited_at"),
+  deletedAt: ts("deleted_at"),
+})
+
+export const chatReactions = pgTable(
+  "chat_reactions",
+  {
+    messageId: uuid("message_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    emoji: text("emoji").notNull(),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.messageId, t.userId, t.emoji] })]
+)
+
+export const chatAttachments = pgTable("chat_attachments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  messageId: uuid("message_id"),
+  channelId: uuid("channel_id").notNull(),
+  uploaderId: uuid("uploader_id").notNull(),
+  objectKey: text("object_key").notNull(),
+  name: text("name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+})
+
+export const notifications = pgTable("notifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull(),
+  workspaceId: uuid("workspace_id").notNull(),
+  kind: text("kind").notNull(),
+  actorId: uuid("actor_id"),
+  targetType: text("target_type").notNull(),
+  targetId: uuid("target_id").notNull(),
+  channelId: uuid("channel_id"),
+  preview: text("preview").notNull().default(""),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  readAt: ts("read_at"),
+})

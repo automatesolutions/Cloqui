@@ -66,3 +66,34 @@ export async function signIn(page: Page, email: string, next?: string) {
   await page.getByRole("button", { name: "Sign in" }).click()
   await expect(page).not.toHaveURL(/\/sign-in/)
 }
+
+/** Adds an existing account to a workspace directly (test setup only, service role). */
+export async function addToWorkspace(
+  email: string,
+  slug: string,
+  role: "admin" | "member" | "guest" = "member"
+) {
+  const { data: ws } = await admin.from("workspaces").select("id").eq("slug", slug).single()
+  const { data: p } = await admin.from("profiles").select("id").eq("email", email).single()
+  if (!ws || !p) throw new Error("addToWorkspace: workspace or person not found")
+  const { error } = await admin
+    .from("workspace_members")
+    .insert({ workspace_id: ws.id, user_id: p.id, role })
+  if (error) throw error
+}
+
+/** Signs up a confirmed account and creates a workspace through the UI. Returns the slug. */
+export async function ownerWithWorkspace(
+  page: import("@playwright/test").Page,
+  name: string,
+  prefix: string
+) {
+  const email = await createConfirmedUser(name)
+  await signIn(page, email)
+  const slug = `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`
+  await page.getByLabel("Workspace name").fill(`${prefix} team`)
+  await page.getByLabel("Web address").fill(slug)
+  await page.getByRole("button", { name: "Create workspace" }).click()
+  await expect(page.getByRole("heading", { name: "Invite your team" })).toBeVisible()
+  return { email, slug }
+}
