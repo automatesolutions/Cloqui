@@ -1,6 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 import { z } from "zod"
 import {
   domainSchema,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/validation"
 import { requireUser } from "@/server/auth"
 import { AccessDeniedError } from "@/server/authz"
+import { deleteWorkspace, setRequireTwoFactor, setRetention } from "@/server/workspace-admin"
 import {
   changeMemberRole,
   inviteMembers,
@@ -126,4 +128,53 @@ export async function removeMemberAction(slug: string, userId: string): Promise<
   }
   revalidatePath(`/w/${slug}/settings/members`)
   return { ok: true }
+}
+
+export async function setRequireTwoFactorAction(slug: string, on: boolean): Promise<FormState> {
+  const user = await requireUser()
+  try {
+    await setRequireTwoFactor(user, slug, on)
+  } catch (e) {
+    return failure(e)
+  }
+  revalidatePath(`/w/${slug}/settings/security`)
+  return { ok: true }
+}
+
+// Empty means "keep forever". Otherwise a whole number of days, 7 to 3650.
+const retentionDays = z.preprocess(
+  (v) => (v === "" || v === "forever" || v == null ? null : Number(v)),
+  z.number().int().min(7, { error: "Keep things at least 7 days." }).max(3650, { error: "10 years is the most." }).nullable()
+)
+
+export async function setRetentionAction(
+  slug: string,
+  _: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const user = await requireUser()
+  const parsed = z
+    .object({ retentionVideoDays: retentionDays, retentionMessageDays: retentionDays })
+    .safeParse({
+      retentionVideoDays: formData.get("retentionVideoDays"),
+      retentionMessageDays: formData.get("retentionMessageDays"),
+    })
+  if (!parsed.success) return { fieldErrors: fieldErrorsOf(parsed.error) }
+  try {
+    await setRetention(user, slug, parsed.data)
+  } catch (e) {
+    return failure(e)
+  }
+  revalidatePath(`/w/${slug}/settings/security`)
+  return { ok: true, message: "Saved." }
+}
+
+export async function deleteWorkspaceAction(slug: string, typedName: string): Promise<FormState> {
+  const user = await requireUser()
+  try {
+    await deleteWorkspace(user, slug, typedName)
+  } catch (e) {
+    return failure(e)
+  }
+  redirect("/home")
 }

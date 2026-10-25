@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useTheme } from "next-themes"
-import { Check, ChevronsUpDown, LogOut, Monitor, Moon, Plus, ShieldOff, Sun } from "lucide-react"
+import { Check, ChevronsUpDown, LogOut, Monitor, Moon, Plus, ShieldCheck, ShieldOff, Sun } from "lucide-react"
 import { signOutAction, signOutEverywhereAction } from "@/app/(auth)/actions"
 import {
   DropdownMenu,
@@ -76,6 +76,12 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
           <span className="truncate text-callout font-semibold">{name}</span>
           <span className="truncate text-footnote font-normal text-fg-secondary">{email}</span>
         </DropdownMenuLabel>
+        <DropdownMenuItem asChild>
+          <Link href="/account">
+            <ShieldCheck aria-hidden className="size-4" strokeWidth={1.75} />
+            Account and security
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-footnote text-fg-muted">Theme</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={theme ?? "system"} onValueChange={setTheme}>

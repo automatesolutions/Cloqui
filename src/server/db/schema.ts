@@ -41,6 +41,9 @@ export const workspaces = pgTable("workspaces", {
   name: text("name").notNull(),
   slug: citext("slug").notNull().unique(),
   allowedEmailDomain: citext("allowed_email_domain"),
+  require2fa: boolean("require_2fa").notNull().default(false),
+  retentionVideoDays: integer("retention_video_days"),
+  retentionMessageDays: integer("retention_message_days"),
   createdBy: uuid("created_by").notNull(),
   createdAt: ts("created_at").notNull().defaultNow(),
 })
@@ -476,3 +479,15 @@ export type TaskFilters = {
   status?: TaskStatusKind
   q?: string
 }
+
+// ── Phase 6: automations ────────────────────────────────────────────────────
+export const taskAutomations = pgTable("task_automations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  listId: uuid("list_id").notNull(),
+  statusId: uuid("status_id").notNull(),
+  action: text("action").$type<"notify_assignees" | "notify_user" | "post_channel">().notNull(),
+  targetUserId: uuid("target_user_id"),
+  targetChannelId: uuid("target_channel_id"),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+})

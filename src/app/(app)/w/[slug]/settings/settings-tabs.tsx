@@ -9,7 +9,12 @@ export function SettingsTabs({ slug, showAdmin }: { slug: string; showAdmin: boo
   const tabs = [
     { href: `/w/${slug}/settings`, label: "Workspace" },
     { href: `/w/${slug}/settings/members`, label: "Members" },
-    ...(showAdmin ? [{ href: `/w/${slug}/settings/audit`, label: "Audit log" }] : []),
+    ...(showAdmin
+      ? [
+          { href: `/w/${slug}/settings/security`, label: "Security" },
+          { href: `/w/${slug}/settings/audit`, label: "Audit log" },
+        ]
+      : []),
   ]
   return (
     <nav aria-label="Settings" className="mb-8 flex gap-1 overflow-x-auto border-b border-border">

@@ -11,6 +11,10 @@ export type AuditAction =
   | "member.role_changed"
   | "member.removed"
   | "member.left"
+  | "workspace.exported"
+  | "security.2fa_required"
+  | "security.2fa_optional"
+  | "security.retention_changed"
 
 /** Append an audit event inside the caller's RLS transaction (actor must be the signed-in person). */
 export async function audit(

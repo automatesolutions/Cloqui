@@ -75,7 +75,13 @@ export async function signInAction(_: FormState, formData: FormData): Promise<Fo
       return { message: "Too many tries. Wait a minute and try again.", values }
     return { message: "That email and password don't match.", values }
   }
-  redirect(safeNext(formData.get("next")))
+  const next = safeNext(formData.get("next"))
+  // With two-step sign-in on, the password alone only gets you to the code screen.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+    redirect(`/sign-in/2fa?next=${encodeURIComponent(next)}`)
+  }
+  redirect(next)
 }
 
 export async function magicLinkAction(_: FormState, formData: FormData): Promise<FormState> {

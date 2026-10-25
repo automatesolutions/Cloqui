@@ -2,7 +2,7 @@ import "server-only"
 import { cache } from "react"
 import { and, eq } from "drizzle-orm"
 import type { CurrentUser } from "@/server/auth"
-import { withRls } from "@/server/db"
+import { systemDb, withRls } from "@/server/db"
 import { workspaceMembers, workspaces, type WorkspaceRole } from "@/server/db/schema"
 import { roleCan, type WorkspaceAction } from "./roles"
 
@@ -66,4 +66,22 @@ export async function authorize(user: CurrentUser, action: WorkspaceAction, slug
   const access = await can(user, action, slug)
   if (!access) throw new AccessDeniedError()
   return access
+}
+
+/**
+ * True when this person is a member of the workspace but it requires two-step sign-in and their
+ * session doesn't have it. RLS already hides everything in that case; this only picks the message.
+ */
+export async function needsTwoFactorFor(user: CurrentUser, slug: string): Promise<boolean> {
+  if (user.aal === "aal2") return false
+  const rows = await systemDb
+    .select({ require2fa: workspaces.require2fa })
+    .from(workspaces)
+    .innerJoin(
+      workspaceMembers,
+      and(eq(workspaceMembers.workspaceId, workspaces.id), eq(workspaceMembers.userId, user.id))
+    )
+    .where(eq(workspaces.slug, slug.toLowerCase()))
+    .limit(1)
+  return rows[0]?.require2fa ?? false
 }

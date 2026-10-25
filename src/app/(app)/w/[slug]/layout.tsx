@@ -1,12 +1,13 @@
 import { Suspense } from "react"
 import Link from "next/link"
-import { Lock } from "lucide-react"
+import { Lock, ShieldCheck } from "lucide-react"
 import { Logo } from "@/components/brand/logo"
 import { MobileTabBar, SidebarNav } from "@/components/app/shell-nav"
 import { UserMenu, WorkspaceSwitcher } from "@/components/app/shell-menus"
 import { AccessDenied } from "@/components/privacy/access-denied"
+import { Button } from "@/components/ui/button"
 import { requireUser } from "@/server/auth"
-import { getWorkspaceAccess } from "@/server/authz"
+import { getWorkspaceAccess, needsTwoFactorFor } from "@/server/authz"
 import { MainFrame } from "@/components/app/main-frame"
 import { NotificationBell } from "@/components/app/notification-bell"
 import { unreadNotificationCount } from "@/server/chat"
@@ -32,6 +33,7 @@ async function Shell({
   const access = await getWorkspaceAccess(user, slug)
 
   if (!access) {
+    const needsTwoFactor = await needsTwoFactorFor(user, slug)
     return (
       <div className="flex min-h-dvh flex-col">
         <header className="container-page flex h-14 items-center">
@@ -44,7 +46,11 @@ async function Shell({
           </Link>
         </header>
         <main id="main" className="flex flex-1 items-center justify-center">
-          <AccessDenied body="Only people invited to this workspace can open it. Ask one of its admins for an invite." />
+          {needsTwoFactor ? (
+            <TwoFactorRequired />
+          ) : (
+            <AccessDenied body="Only people invited to this workspace can open it. Ask one of its admins for an invite." />
+          )}
         </main>
       </div>
     )
@@ -106,6 +112,27 @@ function ShellSkeleton() {
             <div className="h-40 rounded-lg bg-raised" />
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function TwoFactorRequired() {
+  return (
+    <div className="mx-auto flex max-w-md flex-col items-center px-6 py-16 text-center">
+      <ShieldCheck aria-hidden className="mb-5 size-12 text-brand-ink" strokeWidth={1.75} />
+      <h1 className="text-title-3 font-medium">Turn on two-step sign-in first</h1>
+      <p className="mt-2 text-callout text-fg-secondary">
+        This workspace asks everyone to sign in with a code from an authenticator app. Set it up
+        once, and you&apos;re in.
+      </p>
+      <div className="mt-6 flex w-full max-w-[260px] flex-col gap-2">
+        <Button asChild>
+          <Link href="/account">Set up two-step sign-in</Link>
+        </Button>
+        <Button variant="ghost" asChild>
+          <Link href="/home">Go to Home</Link>
+        </Button>
       </div>
     </div>
   )

@@ -9,7 +9,7 @@ export type Db = PostgresJsDatabase<typeof schema>
 export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0]
 
 /** Claims from a verified Supabase JWT. Only `sub` and `email` are needed by policies. */
-export type RlsClaims = { sub: string; email?: string; role?: string }
+export type RlsClaims = { sub: string; email?: string; role?: string; aal?: "aal1" | "aal2" }
 
 const globalForDb = globalThis as unknown as { cloquiSql?: ReturnType<typeof postgres> }
 

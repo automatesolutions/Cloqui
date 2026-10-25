@@ -39,6 +39,14 @@ function describe(e: Event, names: Map<string, string>): string {
       return `${actor} changed ${target}'s role from ${m.from} to ${m.to}`
     case "member.removed":
       return `${actor} removed ${target}`
+    case "workspace.exported":
+      return `${actor} downloaded a workspace export`
+    case "security.2fa_required":
+      return `${actor} made two-step sign-in required`
+    case "security.2fa_optional":
+      return `${actor} made two-step sign-in optional`
+    case "security.retention_changed":
+      return `${actor} changed how long videos and messages are kept`
     default:
       return `${actor}: ${e.action}`
   }
