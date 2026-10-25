@@ -31,6 +31,17 @@ test("spaces, lists, the task drawer, board, calendar, timeline, chat-to-task", 
   await expectAccessible(page)
   await expectTapTargets(page)
 
+  // ── Automations ──
+  await page.getByRole("button", { name: "Automations" }).click()
+  const auto = page.getByRole("dialog", { name: "Automations" })
+  await expect(auto.getByText("No automations on this list yet.")).toBeVisible()
+  await expectAccessible(page)
+  await expectTapTargets(page)
+  await auto.getByRole("button", { name: "Add automation" }).click()
+  await expect(auto.getByText("When moved to Done, notify the assignees")).toBeVisible()
+  await page.keyboard.press("Escape")
+  await expect(page.getByRole("button", { name: "Automations (1)" })).toBeVisible()
+
   // ── The drawer ──
   await page.getByRole("button", { name: "Write launch post", exact: true }).click()
   const drawer = page.getByRole("dialog")

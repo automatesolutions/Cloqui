@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto"
+import { createHmac, randomUUID } from "node:crypto"
 import { config } from "dotenv"
 import { createClient } from "@supabase/supabase-js"
 import { expect, type Page } from "@playwright/test"
@@ -96,4 +96,24 @@ export async function ownerWithWorkspace(
   await page.getByRole("button", { name: "Create workspace" }).click()
   await expect(page.getByRole("heading", { name: "Invite your team" })).toBeVisible()
   return { email, slug }
+}
+
+/** RFC 6238 code for a base32 secret, like an authenticator app shows. */
+export function totp(secret: string, at = Date.now()) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+  let bits = ""
+  for (const c of secret.replace(/=+$/, "").toUpperCase()) {
+    bits += alphabet.indexOf(c).toString(2).padStart(5, "0")
+  }
+  const key = Buffer.from(bits.match(/.{8}/g)!.map((b) => parseInt(b, 2)))
+  const counter = Buffer.alloc(8)
+  counter.writeBigUInt64BE(BigInt(Math.floor(at / 30_000)))
+  const h = createHmac("sha1", key).update(counter).digest()
+  const o = h[h.length - 1] & 0xf
+  return String((h.readUInt32BE(o) & 0x7fffffff) % 1_000_000).padStart(6, "0")
+}
+
+/** Waits until a fresh 30-second window, so a code isn't reused (auth servers refuse that). */
+export async function nextTotpWindow() {
+  await new Promise((r) => setTimeout(r, 30_000 - (Date.now() % 30_000) + 500))
 }
