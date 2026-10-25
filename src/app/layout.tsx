@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
+import { TweakPanel } from "@/components/dev/tweak-panel"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <TooltipProvider delayDuration={400}>
             {children}
             <Toaster position="bottom-right" />
+            {process.env.NODE_ENV === "development" && <TweakPanel />}
           </TooltipProvider>
         </ThemeProvider>
       </body>
