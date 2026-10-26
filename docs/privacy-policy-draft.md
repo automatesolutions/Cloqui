@@ -12,7 +12,8 @@ can do about it.
 
 ## The short version
 
-- Everything you put in Cloqui is private by default. Only people you invite can see it.
+- Everything you put in Cloqui is private by default. Only people you invite can see it, unless
+  you turn on a public link for a video. Then anyone with that link can watch it.
 - We don't sell your data, show ads, or use your content to train AI.
 - Your data is encrypted in transit and at rest. It is **not** end-to-end encrypted: our systems
   can technically read it so they can show it to the people you share it with.
@@ -28,7 +29,9 @@ attachments; tasks, comments and files; live room details. Live calls themselves
 
 **Usage and security data**: when you sign in, the device and browser, IP address, and
 who viewed a video and when (shown to the video's owner). Workspace admins see an audit log of
-admin actions.
+admin actions. When someone watches through a public link, we record that it was watched and
+keep a scrambled (hashed) form of their IP address to limit abuse. We don't keep the address
+itself.
 
 We don't use advertising or tracking cookies. We use cookies only to keep you signed in.
 

@@ -5,7 +5,7 @@ What Cloqui protects, how, and what it does **not** claim. Keep this honest. If 
 ## What we claim
 
 - **Encrypted in transit and at rest.** TLS everywhere. Supabase Postgres and Cloudflare R2 encrypt stored data.
-- **No public links.** Every item URL requires a signed-in, invited person.
+- **Private by default.** Every item URL requires a signed-in, invited person. The one exception is a video's public link, which is off until its owner turns it on and which workspace admins can block.
 - **Short-lived playback links.** Video and file URLs are R2 signed URLs that expire after 5 minutes by default.
 
 ## What we don't claim
@@ -33,12 +33,23 @@ What Cloqui protects, how, and what it does **not** claim. Keep this honest. If 
 
 ## Videos and sharing
 
-- **Private by default.** A new video is visible only to its owner. Sharing means naming people (or turning on "everyone in the workspace"). There is no public or "anyone with the link" option anywhere in the schema.
+- **Private by default.** A new video is visible only to its owner. Sharing means naming people, turning on "everyone in the workspace", or turning on a public link.
 - **One access rule in the database.** `public.video_role()` backs both RLS and the app. Permission tests cover the outsider, colleague, admin, guest, removed, expired, passcode and deleted cases (`tests/permissions/videos.test.ts`).
 - **Short-lived links.** Video and image URLs are signed for 5 minutes and renewed only after a fresh access check. A copied link stops working within minutes.
 - **Passcodes** are stored as scrypt hashes, compared in constant time, and rate limited to 5 tries and then 1 every 5 minutes. Wrong attempts are logged.
 - **Access requests** can't be used to probe for videos: asking about an id that doesn't exist looks the same as asking about one that does. A denied person only learns the owner's first name.
 - **Audit trail per video:** uploads, views (at most one logged per person every 30 minutes), sharing changes, requests and passcode failures. Visible to the owner and workspace admins. Nobody can edit it.
+- **Public links (opt-in, videos only).** Added 2026-10-26 at Jonel's request. How they're kept narrow:
+  - Off for every video until its owner turns one on, after a confirm dialog. Only the owner can turn it on or read the link.
+  - Workspace admins can block public links in Security settings (on by default). Blocking stops every link at once and deletes them, including links on private videos the admin can't see. Allowing them again doesn't bring old links back.
+  - The link is a random 256-bit token at `/p/<token>`, separate from the video's normal `/v/<id>` address. Turning it off and on again makes a new token. It's stored in `video_public_links`, which only the owner can read under RLS (people the video is shared with can see the `videos` row, so the token isn't kept there). It is stored in plain text so the owner can copy it again, so anyone with database access could read it.
+  - One rule decides whether a link works: `public.public_video_id()`. It checks the link exists, the video isn't deleted or still uploading, the workspace allows public links and the access end date hasn't passed. It isn't granted to `anon` or `authenticated`; only the server calls it.
+  - Public viewers can only watch: no comments, reactions, download button, share list or other viewers' names. Playback still uses 5-minute signed URLs, renewed only after the rule passes again, so turning a link off stops open players within minutes.
+  - A passcode applies to public viewers too. A correct passcode gives that browser tab a random unlock token (12 hours, hash stored, tied to the video and the passcode version). Tries are rate limited per visitor.
+  - Visitors have no account, so rate limits and view logs use a hash of their IP address (the last `X-Forwarded-For` entry, which Cloud Run sets), never the address itself. Each anonymous view is logged at most once per visitor every 30 minutes, with no actor.
+  - The page sends `noindex` and `no-referrer` and its tab title is just "Video".
+  - The watermark can't show an email for public viewers, because they don't sign in. The share panel says so when both are on.
+  - Permission tests: `tests/permissions/public-links.test.ts`.
 - **Limits stated in the UI:** view-only hides downloads but can't stop screen recording, and the watermark discourages leaks but can't prevent them.
 
 ## Live rooms

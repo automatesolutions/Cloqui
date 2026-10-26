@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { audienceLabel } from "@/lib/audience"
 import { formatDuration, relativeDate } from "@/lib/format"
 import { requireUser } from "@/server/auth"
+import { getPublicLinkState, hasPublicLink } from "@/server/public-links"
 import {
   canSeeVideoActivity,
   getVideoView,
@@ -74,22 +75,34 @@ async function VideoBody({ params }: { params: PageProps<"/v/[id]">["params"] })
   const { video, role, workspace, owner } = view
   const isOwner = role === "owner"
   const canEdit = role === "owner" || role === "editor"
-  const [playback, comments, reactions, grants, requests, suggestions, showActivity] =
-    await Promise.all([
-      issuePlayback(user, id),
-      listComments(user, id),
-      listReactions(user, id),
-      listGrants(user, id),
-      listAccessRequests(user, id),
-      shareSuggestions(user, id),
-      canSeeVideoActivity(user, id, video.workspaceId),
-    ])
+  const [
+    playback,
+    comments,
+    reactions,
+    grants,
+    requests,
+    suggestions,
+    showActivity,
+    publicLink,
+    publicOn,
+  ] = await Promise.all([
+    issuePlayback(user, id),
+    listComments(user, id),
+    listReactions(user, id),
+    listGrants(user, id),
+    listAccessRequests(user, id),
+    shareSuggestions(user, id),
+    canSeeVideoActivity(user, id, video.workspaceId),
+    getPublicLinkState(user, id),
+    hasPublicLink(user, id),
+  ])
   const activity = showActivity ? await listVideoActivity(user, id) : []
   const audience = audienceLabel({
     viewerIsOwner: isOwner,
     workspaceVisible: video.workspaceVisible,
     workspaceName: workspace.name,
     others: grants.map((g) => ({ name: g.name })),
+    publicLink: publicOn,
   })
 
   const sharePanel = (
@@ -103,6 +116,7 @@ async function VideoBody({ params }: { params: PageProps<"/v/[id]">["params"] })
       suggestions={suggestions}
       requests={requests}
       hasPasscode={!!video.passcodeHash}
+      publicLink={publicLink}
       settings={{
         workspaceVisible: video.workspaceVisible,
         accessExpiresAt: video.accessExpiresAt
@@ -190,9 +204,12 @@ async function VideoBody({ params }: { params: PageProps<"/v/[id]">["params"] })
               </h2>
               <AccessChip label={audience.label} scope={audience.scope} people={audience.people} />
               <p className="text-footnote text-fg-secondary">
-                {video.accessExpiresAt
-                  ? `Access ends ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(video.accessExpiresAt)}.`
+                {publicOn
+                  ? "Anyone with the public link can watch, without signing in."
                   : "Only the people on the list can open this link."}
+                {video.accessExpiresAt
+                  ? ` Access ends ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(video.accessExpiresAt)}.`
+                  : ""}
                 {video.passcodeHash ? " A passcode is required." : ""}
                 {video.viewOnly ? " View only." : ""}
               </p>
@@ -274,7 +291,15 @@ function describeActivity(action: string, actor: string, m: Record<string, unkno
     case "video.access_declined":
       return `${actor} declined ${m.name ?? "a"}'s request`
     case "video.passcode_failed":
-      return `${actor} entered a wrong passcode`
+      return m.publicLink
+        ? "Someone entered a wrong passcode on the public link"
+        : `${actor} entered a wrong passcode`
+    case "video.public_link_on":
+      return `${actor} turned on the public link`
+    case "video.public_link_off":
+      return `${actor} turned off the public link`
+    case "video.viewed_public":
+      return "Someone watched through the public link"
     default:
       return `${actor}: ${action}`
   }

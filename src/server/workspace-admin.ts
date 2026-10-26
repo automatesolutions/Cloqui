@@ -23,6 +23,7 @@ export type SecuritySettings = {
   require2fa: boolean
   retentionVideoDays: number | null
   retentionMessageDays: number | null
+  allowPublicLinks: boolean
   /** Members without two-step sign-in set up. They lose access the moment it's required. */
   membersWithoutTwoFactor: { id: string; name: string }[]
 }
@@ -38,6 +39,7 @@ export async function getSecuritySettings(
         require2fa: workspaces.require2fa,
         retentionVideoDays: workspaces.retentionVideoDays,
         retentionMessageDays: workspaces.retentionMessageDays,
+        allowPublicLinks: workspaces.allowPublicLinks,
       })
       .from(workspaces)
       .where(eq(workspaces.id, workspace.id))

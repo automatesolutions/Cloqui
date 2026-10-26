@@ -10,6 +10,14 @@ export async function expectAccessible(page: Page) {
       .filter((el) => el.checkVisibility())
       .every((el) => getComputedStyle(el).opacity === "1")
   )
+  // Toasts fade in too. Wait for finite animations and transitions (not looping spinners).
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (a) => a.playState !== "running" || a.effect?.getComputedTiming().iterations === Infinity
+      )
+  )
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze()

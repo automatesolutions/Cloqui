@@ -23,6 +23,7 @@ export function VideoCard({
     workspaceVisible: item.workspaceVisible,
     workspaceName,
     others,
+    publicLink: item.publicLink,
   })
   return (
     <article className="group relative overflow-hidden rounded-lg border border-border bg-surface shadow-sm transition-colors duration-150 hover:border-border-strong">

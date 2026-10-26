@@ -1,13 +1,18 @@
 /**
- * The words on every AccessChip. Plain counts and names, never "public".
+ * The words on every AccessChip. Plain counts and names.
  * `others` are the people the video is shared with, not counting the owner.
+ * A public link outranks everything else: it's the widest audience, so it's what the chip says.
  */
 export function audienceLabel(opts: {
   viewerIsOwner: boolean
   workspaceVisible: boolean
   workspaceName: string
   others: { name: string }[]
-}): { label: string; scope: "private" | "workspace"; people: boolean } {
+  publicLink?: boolean
+}): { label: string; scope: "private" | "workspace" | "public"; people: boolean } {
+  if (opts.publicLink) {
+    return { label: "Anyone with the link", scope: "public", people: false }
+  }
   if (opts.workspaceVisible) {
     return { label: `Everyone in ${opts.workspaceName}`, scope: "workspace", people: false }
   }

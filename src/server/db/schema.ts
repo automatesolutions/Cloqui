@@ -44,6 +44,7 @@ export const workspaces = pgTable("workspaces", {
   require2fa: boolean("require_2fa").notNull().default(false),
   retentionVideoDays: integer("retention_video_days"),
   retentionMessageDays: integer("retention_message_days"),
+  allowPublicLinks: boolean("allow_public_links").notNull().default(true),
   createdBy: uuid("created_by").notNull(),
   createdAt: ts("created_at").notNull().defaultNow(),
 })
@@ -157,6 +158,22 @@ export const videoPasscodeUnlocks = pgTable(
   },
   (t) => [primaryKey({ columns: [t.videoId, t.userId] })]
 )
+
+/** Opt-in public link for a video. Only the owner can read it (RLS). */
+export const videoPublicLinks = pgTable("video_public_links", {
+  videoId: uuid("video_id").primaryKey(),
+  token: text("token").notNull().unique(),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+})
+
+/** Passcode unlocks for public-link viewers. System only. */
+export const videoPublicUnlocks = pgTable("video_public_unlocks", {
+  tokenHash: text("token_hash").primaryKey(),
+  videoId: uuid("video_id").notNull(),
+  passcodeVersion: integer("passcode_version").notNull(),
+  expiresAt: ts("expires_at").notNull(),
+})
 
 export const videoComments = pgTable("video_comments", {
   id: uuid("id").primaryKey().defaultRandom(),

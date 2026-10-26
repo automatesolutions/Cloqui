@@ -47,6 +47,14 @@ function describe(e: Event, names: Map<string, string>): string {
       return `${actor} made two-step sign-in optional`
     case "security.retention_changed":
       return `${actor} changed how long videos and messages are kept`
+    case "security.public_links_allowed":
+      return `${actor} allowed public links to videos`
+    case "security.public_links_blocked":
+      return `${actor} turned off public links to videos`
+    case "video.public_link_on":
+      return `${actor} turned on a public link for a video`
+    case "video.public_link_off":
+      return `${actor} turned off a public link for a video`
     default:
       return `${actor}: ${e.action}`
   }

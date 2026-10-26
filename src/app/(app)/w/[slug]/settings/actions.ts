@@ -12,6 +12,7 @@ import {
 } from "@/lib/validation"
 import { requireUser } from "@/server/auth"
 import { AccessDeniedError } from "@/server/authz"
+import { setAllowPublicLinks } from "@/server/public-links"
 import { deleteWorkspace, setRequireTwoFactor, setRetention } from "@/server/workspace-admin"
 import {
   changeMemberRole,
@@ -139,6 +140,21 @@ export async function setRequireTwoFactorAction(slug: string, on: boolean): Prom
   }
   revalidatePath(`/w/${slug}/settings/security`)
   return { ok: true }
+}
+
+export async function setAllowPublicLinksAction(
+  slug: string,
+  allow: boolean
+): Promise<FormState & { removed?: number }> {
+  const user = await requireUser()
+  let removed: number
+  try {
+    removed = await setAllowPublicLinks(user, slug, allow === true)
+  } catch (e) {
+    return failure(e)
+  }
+  revalidatePath(`/w/${slug}/settings/security`)
+  return { ok: true, removed }
 }
 
 // Empty means "keep forever". Otherwise a whole number of days, 7 to 3650.

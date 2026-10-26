@@ -24,7 +24,7 @@ Status: v0.1, 2026-10-25.
 
 1. **Headline = what it does, in under 8 words.** Concrete nouns, no metaphors that need decoding.
 2. **Privacy is how Cloqui works, not a feature.** Say it flatly, once per screen at most. Don't repeat "secure" in every line.
-3. **Short "no" lists build trust**, if each item is true and built: "No public links. No ads. No tracking." Check each claim against the code before it ships.
+3. **Short "no" lists build trust**, if each item is true and built: "Private by default. No ads. No tracking." Check each claim against the code before it ships.
 4. **CTAs name the action and, if it matters, the cost or place:** "Start free", "Record a video", "Open in browser". Never "Get started", "Learn more", "Submit".
 5. **No invented numbers** ("400% more done", "trusted by millions") until there are real, sourced numbers.
 6. **Calm, not playful.** Friendly like a good colleague. No jokes, no "fun & games", no exclamation marks in the product.
@@ -45,29 +45,31 @@ Status: v0.1, 2026-10-25.
 
 ## 3. Cloqui terms (use exactly these)
 
-| Say                             | Don't say                                                       |
-| ------------------------------- | --------------------------------------------------------------- |
-| Cloqui                          | CLOQUI, cloqui (except in code and URLs)                        |
-| workspace                       | org, team space, server                                         |
-| channel, direct message, huddle | room (for chat), DM in UI headings (DM is OK in compact labels) |
-| live room                       | meeting, stream, broadcast                                      |
-| video                           | loom, clip, recording (as a noun for a saved item)              |
-| invite, invited people          | share link, anyone with the link                                |
-| Who can see this                | Permissions, Sharing settings, ACL                              |
-| Owner, Editor, Viewer, Guest    | Admin (for items), Member (for items)                           |
-| Remove access                   | Revoke (in UI; "revoke" is fine in docs and code)               |
-| Request access                  | Ask for permission                                              |
-| people                          | users, members (members is OK in admin screens)                 |
+| Say                                                          | Don't say                                                       |
+| ------------------------------------------------------------ | --------------------------------------------------------------- |
+| Cloqui                                                       | CLOQUI, cloqui (except in code and URLs)                        |
+| workspace                                                    | org, team space, server                                         |
+| channel, direct message, huddle                              | room (for chat), DM in UI headings (DM is OK in compact labels) |
+| live room                                                    | meeting, stream, broadcast                                      |
+| video                                                        | loom, clip, recording (as a noun for a saved item)              |
+| invite, invited people                                       | share link                                                      |
+| Anyone with the link (only for a video's opt-in public link) | Public, public video, open link                                 |
+| Who can see this                                             | Permissions, Sharing settings, ACL                              |
+| Owner, Editor, Viewer, Guest                                 | Admin (for items), Member (for items)                           |
+| Remove access                                                | Revoke (in UI; "revoke" is fine in docs and code)               |
+| Request access                                               | Ask for permission                                              |
+| people                                                       | users, members (members is OK in admin screens)                 |
 
 ## 4. Banned in Cloqui (on top of `/my-tone`)
 
-supercharge, AI-powered (unless describing a real AI feature, then say what it does), reimagine, "all-in-one", "next-gen", "world-class", "blazing fast", "Get started", "Learn more", "Oops", "Whoops", "Uh-oh", "Something went wrong" (alone, with no next step), "Public", "Anyone with the link".
+supercharge, AI-powered (unless describing a real AI feature, then say what it does), reimagine, "all-in-one", "next-gen", "world-class", "blazing fast", "Get started", "Learn more", "Oops", "Whoops", "Uh-oh", "Something went wrong" (alone, with no next step), "Public" on its own. "Anyone with the link" is allowed only for a video's public link, which is off unless its owner turns it on.
 
 ## 5. Approved lines (seed copy)
 
 - Pitch: "Record it, share it, discuss it, and track it. Only with the people you invite."
 - Landing hero: "Video, chat, and tasks behind a closed door." · Sub: "Record your screen, talk it through, and track the work. Only people you invite can see any of it." · CTAs: "Start free" / "See how sharing works"
-- Trust line: "No public links. No ads. No selling your data."
+- Trust line: "Private by default. No ads. No selling your data."
+- Public link: "Anyone with the link can watch" · "No sign-in needed. Anyone who gets the link can watch and pass it on." · Blocked: "Your workspace admins have turned off public links."
 - Record start: "Record" · Countdown: "Starting in 3" · Indicator: "You are recording"
 - Share panel title: "Who can see this"
 - Access denied: "You don't have access to this" · "Only people Jonel invited can open it." · "Request access"
@@ -76,3 +78,5 @@ supercharge, AI-powered (unless describing a real AI feature, then say what it d
 ## Corrections log
 
 <!-- YYYY-MM-DD · "before" → "after" · rule. Also update /my-tone if the rule is about Jonel's voice in general. -->
+
+- 2026-10-26 · "No public links. No ads. No selling your data." → "Private by default. No ads. No selling your data." · Jonel added opt-in public links for videos, so the old claim stopped being true.

@@ -21,7 +21,7 @@ import { HeroReveal } from "@/components/motion/hero-reveal"
 export const metadata: Metadata = {
   title: { absolute: "Cloqui · Video, chat, and tasks behind a closed door" },
   description:
-    "Record your screen, talk it through, and track the work. Only people you invite can see any of it.",
+    "Record your screen, talk it through, and track the work. Only people you choose can see any of it.",
   robots: { index: true, follow: true },
 }
 
@@ -93,7 +93,7 @@ function Hero() {
           Video, chat, and tasks behind a closed door.
         </h1>
         <p data-reveal className="mt-5 max-w-[34rem] text-body-lg text-fg-secondary">
-          Record your screen, talk it through, and track the work. Only people you invite can see
+          Record your screen, talk it through, and track the work. Only people you choose can see
           any of it.
         </p>
         <div data-reveal className="mt-8 flex flex-wrap justify-center gap-2">
@@ -105,7 +105,7 @@ function Hero() {
           </Button>
         </div>
         <p data-reveal className="mt-6 text-footnote text-fg-muted">
-          No public links. No ads. No selling your data.
+          Private by default. No ads. No selling your data.
         </p>
         <div data-reveal className="mt-14 w-full max-w-3xl">
           <HeroProduct />
@@ -154,7 +154,7 @@ const steps = [
   {
     icon: UserPlus,
     title: "Invite people by name",
-    body: 'Add people by email or from your workspace. There\'s no "anyone with the link".',
+    body: "Add people by email or from your workspace. Nothing is shared until you do.",
   },
   {
     icon: Lock,
@@ -382,9 +382,10 @@ function Honesty() {
               </span>
             </li>
             <li>
-              <strong className="font-semibold">No public links, ever.</strong>{" "}
+              <strong className="font-semibold">Private by default.</strong>{" "}
               <span className="text-fg-secondary">
-                Every link checks that you&apos;re signed in and invited.
+                Links check that you&apos;re signed in and invited. A video owner can turn on a
+                public link, and admins can block that.
               </span>
             </li>
             <li>

@@ -13,7 +13,7 @@ export default function SignUpPage({ searchParams }: PageProps<"/sign-up">) {
     <>
       <AuthHeading
         title="Create your account"
-        body="Start free. Only people you invite can see your work."
+        body="Start free. Your work stays private until you share it."
       />
       <Suspense fallback={<AuthFormSkeleton />}>
         <SignUpBody searchParams={searchParams} />

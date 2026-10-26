@@ -20,7 +20,7 @@ Cloud Run Job: "media" (ffmpeg: WebM → MP4, thumbnails; transcription behind a
 1. `src/proxy.ts` refreshes the Supabase session cookie and redirects signed-out people away from app routes. It's an optimistic check only.
 2. Every server action, route handler and data function calls the data access layer in `src/server/`. It resolves the current user from the session and calls `can(user, action, item)`.
 3. Queries run through an RLS-aware Drizzle client: each request runs in a transaction with `set local role authenticated` and the user's JWT claims. Postgres row-level security then filters rows again. A missed `can()` check still can't return rows the user isn't allowed to see.
-4. Files (videos, attachments) are never public. The server checks access, then issues an R2 signed URL that lives for `SIGNED_URL_TTL_SECONDS` (default 300).
+4. Files (videos, attachments) are never public in storage. The server checks access (or a video's opt-in public link, via `public.public_video_id()`), then issues an R2 signed URL that lives for `SIGNED_URL_TTL_SECONDS` (default 300).
 
 ## Videos
 

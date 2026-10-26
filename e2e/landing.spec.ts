@@ -11,7 +11,7 @@ test.describe("landing page", () => {
       page.getByRole("heading", { level: 1, name: "Video, chat, and tasks behind a closed door." })
     ).toBeVisible()
     await expect(page.getByRole("link", { name: "Start free" }).first()).toBeVisible()
-    await expect(page.getByText("No public links. No ads. No selling your data.")).toBeVisible()
+    await expect(page.getByText("Private by default. No ads. No selling your data.")).toBeVisible()
   })
 
   test("is honest about encryption", async ({ page }) => {

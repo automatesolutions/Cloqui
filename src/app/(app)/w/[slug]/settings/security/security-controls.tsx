@@ -17,7 +17,11 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import type { FormState } from "@/lib/validation"
-import { deleteWorkspaceAction, setRequireTwoFactorAction } from "../actions"
+import {
+  deleteWorkspaceAction,
+  setAllowPublicLinksAction,
+  setRequireTwoFactorAction,
+} from "../actions"
 
 export function RequireTwoFactorToggle({
   slug,
@@ -65,6 +69,89 @@ export function RequireTwoFactorToggle({
       ) : (
         <p className="text-footnote text-fg-secondary">Everyone here has it set up.</p>
       )}
+    </div>
+  )
+}
+
+export function AllowPublicLinksToggle({
+  slug,
+  initial,
+  count,
+}: {
+  slug: string
+  initial: boolean
+  count: number
+}) {
+  const [on, setOn] = useState(initial)
+  const [live, setLive] = useState(count)
+  const [confirming, setConfirming] = useState(false)
+  const [error, setError] = useState<string>()
+  const [pending, start] = useTransition()
+
+  function save(next: boolean) {
+    start(async () => {
+      const r = await setAllowPublicLinksAction(slug, next)
+      if (!r.ok) return setError(r.message)
+      setError(undefined)
+      setOn(next)
+      if (!next) setLive(0)
+      toast.success(
+        next
+          ? "Video owners can turn on public links."
+          : r.removed
+            ? `Public links are off. ${r.removed} ${r.removed === 1 ? "link" : "links"} stopped working.`
+            : "Public links are off."
+      )
+    })
+  }
+
+  return (
+    <div className="grid gap-3">
+      <div className="flex items-center justify-between gap-4">
+        <Label htmlFor="allow-public" className="text-callout font-normal">
+          Video owners can turn on a public link
+        </Label>
+        <Switch
+          id="allow-public"
+          checked={on}
+          disabled={pending}
+          aria-describedby="allow-public-help"
+          onCheckedChange={(next) => (next || live === 0 ? save(next) : setConfirming(true))}
+        />
+      </div>
+      <FormMessage message={error} />
+      <p id="allow-public-help" className="text-footnote text-fg-secondary">
+        {on
+          ? live > 0
+            ? `Anyone with the link can watch ${live} ${live === 1 ? "video" : "videos"} here, without signing in. Turning this off stops every link right away.`
+            : "No video here has a public link right now. Each one is off until its owner turns it on."
+          : "Every video here only opens for invited people."}
+      </p>
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Turn off public links?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {live === 1 ? "1 public link stops" : `${live} public links stop`} working right away.
+              Turning this back on doesn&apos;t bring them back.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel asChild>
+              <Button variant="secondary">Keep them</Button>
+            </AlertDialogCancel>
+            <Button
+              variant="danger"
+              onClick={() => {
+                setConfirming(false)
+                save(false)
+              }}
+            >
+              Turn off links
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

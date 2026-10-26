@@ -2,7 +2,7 @@
 
 Record it, share it, discuss it, and track it. Only with the people you invite.
 
-Cloqui is a private-by-default app for screen and camera videos, live rooms, team chat, and tasks. Nothing is public. Every video, room, channel, and task is visible only to the people who were invited.
+Cloqui is a private-by-default app for screen and camera videos, live rooms, team chat, and tasks. Everything is private by default: every video, room, channel, and task is visible only to the people who were invited. The one exception is a video's public link, which is off until its owner turns it on and which workspace admins can block.
 
 > **This repository must stay private.** The Fontshare fonts in `src/app/fonts` are licensed under the ITF Free Font License, which does not allow redistribution through public repositories. See `docs/security.md#fonts`.
 

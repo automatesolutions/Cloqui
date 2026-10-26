@@ -1,12 +1,12 @@
-import { Lock, LockOpen, Users } from "lucide-react"
+import { Globe, Lock, LockOpen, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export type AccessScope = "private" | "workspace"
+export type AccessScope = "private" | "workspace" | "public"
 
 /**
  * Shows who can see an item. Required on every video, room, channel and task.
  * "private" = only invited people (teal lock). "workspace" = everyone in the workspace (grey).
- * There is no "public" scope, by design.
+ * "public" = a video's opt-in public link (amber globe): it needs watching.
  */
 export function AccessChip({
   label,
@@ -21,14 +21,16 @@ export function AccessChip({
   people?: boolean
   className?: string
 }) {
-  const Icon = scope === "workspace" ? LockOpen : people ? Users : Lock
+  const Icon = scope === "public" ? Globe : scope === "workspace" ? LockOpen : people ? Users : Lock
   return (
     <span
       className={cn(
         "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-sm px-2 text-caption font-medium whitespace-nowrap",
         scope === "private"
           ? "bg-brand-soft text-brand-ink"
-          : "border border-border bg-raised text-fg-secondary",
+          : scope === "public"
+            ? "bg-attention-soft text-attention"
+            : "border border-border bg-raised text-fg-secondary",
         className
       )}
     >

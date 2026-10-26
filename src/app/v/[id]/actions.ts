@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import { emailSchema } from "@/lib/validation"
 import { requireUser } from "@/server/auth"
+import { setPublicLink } from "@/server/public-links"
 import { AccessDeniedError } from "@/server/authz"
 import { reactionEmojis } from "@/server/db/schema"
 import {
@@ -124,6 +125,14 @@ export async function updateSettingsAction(
       viewOnly: !!s.viewOnly,
       watermark: !!s.watermark,
     })
+  })
+}
+
+/** Turn the public link on (a new link each time) or off. Owner only. */
+export async function setPublicLinkAction(videoId: string, on: boolean) {
+  return run(videoId, async () => {
+    const url = await setPublicLink(await requireUser(), id.parse(videoId), on === true)
+    return { ok: true, url: url ?? undefined }
   })
 }
 

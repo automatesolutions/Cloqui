@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { ShieldCheck, UserPlus } from "lucide-react"
+import { Copy, Globe, ShieldCheck, UserPlus } from "lucide-react"
 import { toast } from "sonner"
 import { initials } from "@/components/app/initials"
 import { FormMessage } from "@/components/forms/field"
@@ -41,6 +41,7 @@ import {
   removeGrantAction,
   resolveRequestAction,
   setPasscodeAction,
+  setPublicLinkAction,
   shareAction,
   updateSettingsAction,
 } from "./actions"
@@ -57,12 +58,14 @@ export type SharePanelProps = {
   isOwner: boolean
   ownerName: string
   workspaceName: string
-  audience: { label: string; scope: "private" | "workspace"; people: boolean }
+  audience: { label: string; scope: "private" | "workspace" | "public"; people: boolean }
   grants: GrantView[]
   suggestions: { id: string; name: string; email: string }[]
   requests: { id: string; name: string; email: string }[]
   settings: Settings
   hasPasscode: boolean
+  /** Only set for the owner. */
+  publicLink: { url: string | null; allowed: boolean } | null
 }
 
 const roleLabel = { viewer: "Viewer", editor: "Editor" } as const
@@ -97,19 +100,144 @@ export function SharePanel(p: SharePanelProps) {
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-8 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="min-w-0 flex-1 text-footnote text-fg-secondary">
+              This link only opens for people on the list.
+            </p>
+            <CopyLinkButton path={`/v/${p.videoId}`} />
+          </div>
           {p.isOwner && p.requests.length > 0 && (
             <Requests videoId={p.videoId} requests={p.requests} />
           )}
           {p.isOwner && <AddPeople videoId={p.videoId} suggestions={p.suggestions} />}
           <People {...p} />
+          {p.isOwner && p.publicLink && (
+            <PublicLink
+              videoId={p.videoId}
+              initial={p.publicLink}
+              watermark={p.settings.watermark}
+            />
+          )}
           {p.isOwner && <Controls {...p} />}
           <p className="flex gap-2 text-footnote text-fg-secondary">
             <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} />
-            Encrypted in transit and at rest. The link only works for people on this list.
+            Encrypted in transit and at rest.
           </p>
         </div>
       </SheetContent>
     </Sheet>
+  )
+}
+
+async function copy(text: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    toast.success("Link copied.")
+  } catch {
+    toast.error("Your browser didn't let us copy. Select the link and copy it yourself.")
+  }
+}
+
+function CopyLinkButton({ path }: { path: string }) {
+  return (
+    <Button variant="secondary" size="sm" onClick={() => copy(`${window.location.origin}${path}`)}>
+      <Copy aria-hidden />
+      Copy link
+    </Button>
+  )
+}
+
+function PublicLink({
+  videoId,
+  initial,
+  watermark,
+}: {
+  videoId: string
+  initial: { url: string | null; allowed: boolean }
+  watermark: boolean
+}) {
+  const [url, setUrl] = useState(initial.url)
+  const [confirming, setConfirming] = useState(false)
+  const [pending, start] = useTransition()
+
+  function turn(on: boolean) {
+    start(async () => {
+      const res = await setPublicLinkAction(videoId, on)
+      if (!res.ok) return void toast.error(res.message)
+      setUrl(res.url ?? null)
+      toast.success(on ? "Public link is on." : "Public link is off. The old link no longer works.")
+    })
+  }
+
+  return (
+    <section aria-labelledby="pub-h" className="grid gap-3">
+      <h3 id="pub-h" className="text-headline">
+        Public link
+      </h3>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <Label htmlFor="public-link" className="text-callout font-medium">
+            Anyone with the link can watch
+          </Label>
+          <p id="public-link-help" className="mt-1 text-footnote text-fg-secondary">
+            {initial.allowed
+              ? "No sign-in needed. Anyone who gets the link can watch and pass it on."
+              : "Your workspace admins have turned off public links."}
+          </p>
+        </div>
+        <Switch
+          id="public-link"
+          checked={!!url}
+          disabled={pending || (!initial.allowed && !url)}
+          onCheckedChange={(on) => (on ? setConfirming(true) : turn(false))}
+          aria-describedby="public-link-help"
+        />
+      </div>
+      {url && (
+        <div className="grid gap-2 rounded-lg border border-attention/40 bg-attention-soft p-3">
+          <p className="flex items-center gap-1.5 text-footnote font-medium text-attention">
+            <Globe aria-hidden className="size-4" strokeWidth={1.75} />
+            Anyone with this link can watch
+          </p>
+          <div className="flex gap-2">
+            <Input
+              readOnly
+              value={url}
+              aria-label="Public link"
+              onFocus={(e) => e.currentTarget.select()}
+              className="flex-1 font-mono text-footnote"
+            />
+            <Button variant="secondary" onClick={() => copy(url)}>
+              <Copy aria-hidden />
+              Copy
+            </Button>
+          </div>
+          <p className="text-footnote text-fg-secondary">
+            Viewers can only watch: no comments, no download. Turning it off stops the link right
+            away, and turning it on again makes a new one.
+            {watermark ? " Viewers don't sign in, so no email shows on the video for them." : ""}
+          </p>
+        </div>
+      )}
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Turn on a public link?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Anyone who gets the link can watch without signing in, and pass it on.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel asChild>
+              <Button variant="secondary">Keep it private</Button>
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button onClick={() => turn(true)}>Turn on link</Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </section>
   )
 }
 
@@ -473,7 +601,7 @@ function Controls(p: SharePanelProps) {
         <p className="text-footnote text-fg-secondary">
           {p.hasPasscode
             ? "Viewers need the passcode too. Changing it asks everyone again."
-            : "People on the list will also need to type this. Share it separately."}
+            : "Everyone watching needs to type this, public link included. Share it separately."}
         </p>
         {p.hasPasscode && (
           <Button

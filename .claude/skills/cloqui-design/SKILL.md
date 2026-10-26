@@ -186,7 +186,8 @@ Built on Tailwind + shadcn/ui (MIT), restyled to these tokens. Check the licence
 
 These are the heart of the Cloqui look. Every video, live room, channel, task and file shows who can see it.
 
-- **`AccessChip`**: lock icon (16) + audience label, `caption` 500, `r-sm`, `accent-soft` fill with `accent` text when private to a small group, `raised` fill with `text-secondary` when shared to the whole workspace. Labels: "Only you", "You and Maria", "4 people", "Design team", "Everyone in Acme". Never "Public"; it doesn't exist.
+- **`AccessChip`**: lock icon (16) + audience label, `caption` 500, `r-sm`, `accent-soft` fill with `accent` text when private to a small group, `raised` fill with `text-secondary` when shared to the whole workspace. Labels: "Only you", "You and Maria", "4 people", "Design team", "Everyone in Acme". **Public link** (videos only, opt-in): `Globe` icon, `attention-soft` fill with `attention` text, label "Anyone with the link". Amber because it needs watching, not because it's wrong. Never use the word "Public" on its own.
+- **Public link section** in the video share panel (owner only): off by default. When on, an `attention-soft` box with the link (read-only input), "Copy link", and one line on the effect. When workspace admins have blocked public links, the toggle is disabled with that reason under it.
 - **"Who can see this"** button sits in the header of every item page, one click from the content. Opens the share panel: people list with roles (Owner, Editor, Viewer, Guest), add-people field (email or member), and per-item controls (expiry, view-only, passcode, watermark). Each control states its effect in plain words under it.
 - **Private badge**: `Private` with a lock, shown on shared items and rich cards in chat.
 - **Recording indicator**: a fixed pill at the top centre, `raised` fill, red pulse dot + "You are recording" + elapsed time (tabular) + Pause + Stop. Live rooms use the same pill: "Live · 4 people".
@@ -200,6 +201,7 @@ Loading (skeletons in `raised` with no shimmer, a 150 ms fade-in after 300 ms so
 
 ## 11. Changelog
 
+- 2026-10-26 · v1.0.4: Jonel approved opt-in public links for videos. AccessChip gains a third scope, "Anyone with the link" (amber, globe icon). Everything else stays invite-only.
 - 2026-10-26 · v1.0.3: hero and onboarding entrances moved from GSAP to CSS keyframes, same look. The hero headline is the largest paint and was waiting on JavaScript: Lighthouse performance 88 → 93.
 - 2026-10-26 · v1.0.2: dark `text-muted` #7A869C → #8290A6. axe caught 4.17:1 on raised surfaces (drawers, menus).
 - 2026-10-25 · v1.0.1: light `text-muted` #6B7689 → #626D80. axe caught 4.28:1 on the light page background.

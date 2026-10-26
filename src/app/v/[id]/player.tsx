@@ -36,10 +36,21 @@ export function Player({
   title,
   watermark,
   viewOnly,
+  playbackUrl = `/api/videos/${videoId}/playback`,
+  unlock,
+  ended: endedText = {
+    title: "Your access to this video ended",
+    body: "Ask the owner if you still need it.",
+  },
 }: {
   videoId: string
   initial: Playback
   title: string
+  /** Where fresh signed URLs come from. The public page uses its own endpoint. */
+  playbackUrl?: string
+  /** Passcode unlock for public-link viewers, sent with each refresh. */
+  unlock?: string | null
+  ended?: { title: string; body: string }
   /** Viewer's email, drawn over the video when the owner turned on the watermark. */
   watermark: string | null
   viewOnly: boolean
@@ -54,7 +65,10 @@ export function Player({
     if (refreshing.current) return
     refreshing.current = true
     try {
-      const res = await fetch(`/api/videos/${videoId}/playback`, { cache: "no-store" })
+      const res = await fetch(playbackUrl, {
+        cache: "no-store",
+        headers: unlock ? { "x-cloqui-unlock": unlock } : undefined,
+      })
       if (res.status === 403) {
         ctx?.ref.current?.pause()
         setEnded(true)
@@ -82,7 +96,7 @@ export function Player({
     } finally {
       refreshing.current = false
     }
-  }, [videoId, ctx])
+  }, [playbackUrl, unlock, ctx])
 
   // Renew a minute before the signed URL expires.
   useEffect(() => {
@@ -96,8 +110,8 @@ export function Player({
       <div className="grid aspect-video place-items-center rounded-lg border border-border bg-raised px-6 text-center">
         <div>
           <Lock aria-hidden className="mx-auto mb-3 size-8 text-fg-secondary" strokeWidth={1.75} />
-          <p className="text-headline">Your access to this video ended</p>
-          <p className="mt-1 text-callout text-fg-secondary">Ask the owner if you still need it.</p>
+          <p className="text-headline">{endedText.title}</p>
+          <p className="mt-1 text-callout text-fg-secondary">{endedText.body}</p>
         </div>
       </div>
     )

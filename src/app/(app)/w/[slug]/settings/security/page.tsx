@@ -3,9 +3,15 @@ import { AccessDenied } from "@/components/privacy/access-denied"
 import { Button } from "@/components/ui/button"
 import { requireUser } from "@/server/auth"
 import { getWorkspaceAccess, roleCan } from "@/server/authz"
+import { countPublicLinks } from "@/server/public-links"
 import { getSecuritySettings } from "@/server/workspace-admin"
 import { setRetentionAction } from "../actions"
-import { DeleteWorkspaceButton, RequireTwoFactorToggle, RetentionForm } from "./security-controls"
+import {
+  AllowPublicLinksToggle,
+  DeleteWorkspaceButton,
+  RequireTwoFactorToggle,
+  RetentionForm,
+} from "./security-controls"
 
 export default async function SecuritySettingsPage({
   params,
@@ -17,7 +23,10 @@ export default async function SecuritySettingsPage({
   if (!roleCan(access.role, "workspace.update")) {
     return <AccessDenied body="Only workspace admins can change security settings." />
   }
-  const settings = await getSecuritySettings(user, slug)
+  const [settings, publicLinks] = await Promise.all([
+    getSecuritySettings(user, slug),
+    countPublicLinks(user, slug),
+  ])
   const section = "grid gap-4 rounded-lg border border-border bg-surface p-5 md:p-6"
   return (
     <div className="grid max-w-3xl gap-8 pb-16">
@@ -31,6 +40,17 @@ export default async function SecuritySettingsPage({
           missing={settings.membersWithoutTwoFactor.map((m) =>
             m.id === user.id ? { ...m, name: `${m.name} (you)` } : m
           )}
+        />
+      </section>
+
+      <section aria-labelledby="sec-pub" className={section}>
+        <h2 id="sec-pub" className="text-title-3 font-medium">
+          Public links
+        </h2>
+        <AllowPublicLinksToggle
+          slug={slug}
+          initial={settings.allowPublicLinks}
+          count={publicLinks}
         />
       </section>
 

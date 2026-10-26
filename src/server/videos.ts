@@ -52,12 +52,16 @@ export type VideoAuditAction =
   | "video.access_approved"
   | "video.access_declined"
   | "video.passcode_failed"
+  | "video.public_link_on"
+  | "video.public_link_off"
+  | "video.viewed_public"
 
-async function videoAudit(
+export async function videoAudit(
   tx: Tx | typeof systemDb,
   e: {
     workspaceId: string
-    actorId: string
+    /** null for someone watching through a public link: they have no account. */
+    actorId: string | null
     videoId: string
     action: VideoAuditAction
     metadata?: Record<string, unknown>
@@ -183,6 +187,7 @@ export type LibraryItem = {
   shareCount: number
   firstShareName: string | null
   hasPasscode: boolean
+  publicLink: boolean
 }
 
 export async function listLibrary(
@@ -205,6 +210,7 @@ export async function listLibrary(
         workspaceVisible: videos.workspaceVisible,
         thumbnailKey: videos.thumbnailKey,
         hasPasscode: sql<boolean>`${videos.passcodeHash} is not null`,
+        publicLink: sql<boolean>`public.has_public_link(${videos.id})`,
         shareCount: sql<number>`(select count(*)::int from public.video_grants g where g.video_id = ${videos.id})`,
         firstShareName: sql<string | null>`(
           select coalesce(p.display_name, g.email::text) from public.video_grants g
@@ -768,13 +774,7 @@ export async function issuePlayback(user: CurrentUser, videoId: string): Promise
   const view = await getVideoView(user, videoId)
   if (view.kind !== "ok") throw new AccessDeniedError()
   const v = view.video
-  const ttl = env.SIGNED_URL_TTL_SECONDS
-  const useProcessed = v.status === "ready" && v.playbackKey
-  const [src, poster, captions] = await Promise.all([
-    presignRead(useProcessed ? v.playbackKey! : v.originalKey, { ttl }),
-    v.thumbnailKey ? presignRead(v.thumbnailKey, { ttl }) : null,
-    v.captionsKey ? presignRead(v.captionsKey, { ttl }) : null,
-  ])
+  const playback = await presignPlayback(v)
   if (view.role !== "owner" && (await takeToken("viewLog", `${user.id}:${videoId}`))) {
     await videoAudit(systemDb, {
       workspaceId: v.workspaceId,
@@ -783,6 +783,23 @@ export async function issuePlayback(user: CurrentUser, videoId: string): Promise
       action: "video.viewed",
     })
   }
+  return playback
+}
+
+/** Signed URLs for a video row. Callers must check access first. */
+export async function presignPlayback(
+  v: Pick<
+    VideoRow,
+    "status" | "playbackKey" | "originalKey" | "thumbnailKey" | "captionsKey" | "mimeType"
+  >
+): Promise<Playback> {
+  const ttl = env.SIGNED_URL_TTL_SECONDS
+  const useProcessed = v.status === "ready" && v.playbackKey
+  const [src, poster, captions] = await Promise.all([
+    presignRead(useProcessed ? v.playbackKey! : v.originalKey, { ttl }),
+    v.thumbnailKey ? presignRead(v.thumbnailKey, { ttl }) : null,
+    v.captionsKey ? presignRead(v.captionsKey, { ttl }) : null,
+  ])
   return {
     src,
     type: useProcessed ? "video/mp4" : v.mimeType,
