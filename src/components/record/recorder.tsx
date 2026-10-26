@@ -88,6 +88,8 @@ export function Recorder({ slug, workspaceName }: { slug: string; workspaceName:
   const [error, setError] = useState<string>()
   const [supported, setSupported] = useState({ record: true, screen: true })
   const [bubbleOpen, setBubbleOpen] = useState(false)
+  // The shared screen, once picked, so the preview shows what's being recorded.
+  const [screenStream, setScreenStream] = useState<MediaStream | null>(null)
 
   const [paused, setPaused] = useState(false)
   const [elapsed, setElapsed] = useState(0)
@@ -142,6 +144,13 @@ export function Recorder({ slug, workspaceName }: { slug: string; workspaceName:
     if (el && camStream.current && el.srcObject !== camStream.current)
       el.srcObject = camStream.current
   }, [])
+
+  const attachScreen = useCallback(
+    (el: HTMLVideoElement | null) => {
+      if (el && el.srcObject !== screenStream) el.srcObject = screenStream
+    },
+    [screenStream]
+  )
 
   useEffect(() => {
     if (mode === "screen") {
@@ -268,6 +277,7 @@ export function Recorder({ slug, workspaceName }: { slug: string; workspaceName:
       rec.ondataavailable = (e) => e.data.size > 0 && chunks.current.push(e.data)
       rec.onstop = finish
       recorder.current = rec
+      if (mode !== "camera") setScreenStream(acquired[0])
       setPhase("countdown")
     } catch (e) {
       acquired.forEach(stopStream)
@@ -318,6 +328,7 @@ export function Recorder({ slug, workspaceName }: { slug: string; workspaceName:
     const blob = new Blob(chunks.current, { type })
     streams.current.forEach(stopStream)
     streams.current = []
+    setScreenStream(null)
     closeBubble.current?.()
     closeBubble.current = null
     setBubbleOpen(false)
@@ -462,14 +473,25 @@ export function Recorder({ slug, workspaceName }: { slug: string; workspaceName:
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="relative grid aspect-video place-items-center overflow-hidden rounded-lg border border-border bg-raised">
-              {mode === "screen" ? (
-                <div className="flex flex-col items-center gap-2 px-6 text-center text-fg-secondary">
-                  <Monitor aria-hidden className="size-10" strokeWidth={1.5} />
-                  <p className="text-callout">
-                    You&apos;ll choose a screen, window or tab after you press Start.
-                  </p>
-                </div>
-              ) : (
+              {mode !== "camera" &&
+                (screenStream ? (
+                  <video
+                    ref={attachScreen}
+                    autoPlay
+                    muted
+                    playsInline
+                    aria-label="Screen preview"
+                    className="size-full bg-black object-contain"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 px-6 text-center text-fg-secondary">
+                    <Monitor aria-hidden className="size-10" strokeWidth={1.5} />
+                    <p className="text-callout">
+                      You&apos;ll choose a screen, window or tab after you press Start.
+                    </p>
+                  </div>
+                ))}
+              {mode !== "screen" && (
                 <video
                   ref={attachPreview}
                   autoPlay
@@ -479,7 +501,7 @@ export function Recorder({ slug, workspaceName }: { slug: string; workspaceName:
                   className={cn(
                     "-scale-x-100 object-cover",
                     mode === "both"
-                      ? "size-40 rounded-full border-4 border-surface shadow-lg"
+                      ? "absolute top-3 right-3 size-24 rounded-full border-4 border-surface shadow-lg sm:size-32"
                       : "size-full"
                   )}
                 />
