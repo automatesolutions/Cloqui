@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
+import { appURL } from "@/lib/app-url"
 import { createSupabaseServerClient } from "@/lib/supabase/server"
 import { safeNext } from "@/lib/validation"
 
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = await createSupabaseServerClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) return NextResponse.redirect(new URL(next, url.origin))
+    if (!error) return NextResponse.redirect(appURL(next))
   }
-  return NextResponse.redirect(new URL("/sign-in?error=oauth", url.origin))
+  return NextResponse.redirect(appURL("/sign-in?error=oauth"))
 }

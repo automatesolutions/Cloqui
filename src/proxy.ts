@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
+import { appURL } from "@/lib/app-url"
 import { updateSession } from "@/lib/supabase/proxy"
 
 // Optimistic checks only. Real authorization happens next to the data (src/server/authz + RLS).
@@ -13,10 +14,7 @@ export async function proxy(request: NextRequest) {
     !userId &&
     appPrefixes.some((p) => pathname === p.replace(/\/$/, "") || pathname.startsWith(p))
   ) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/sign-in"
-    url.search = `?next=${encodeURIComponent(pathname + search)}`
-    return NextResponse.redirect(url)
+    return NextResponse.redirect(appURL(`/sign-in?next=${encodeURIComponent(pathname + search)}`))
   }
 
   if (userId && authPages.includes(pathname)) {
@@ -25,7 +23,7 @@ export async function proxy(request: NextRequest) {
       next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\")
         ? next
         : "/home"
-    return NextResponse.redirect(new URL(target, request.url))
+    return NextResponse.redirect(appURL(target))
   }
 
   return response
